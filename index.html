@@ -365,9 +365,7 @@
     transition: color 0.2s;
   }
 
-  .btn-secondary::after { content: '→'; transition: transform 0.2s; }
   .btn-secondary:hover { color: var(--terra); }
-  .btn-secondary:hover::after { transform: translateX(3px); }
 
   .hero-right {
     position: relative;
@@ -1123,12 +1121,9 @@
       </p>
       <div class="hero-actions">
         <a href="#sluzby" class="btn-primary">Zobrazit služby</a>
-        <a href="#kontakt" class="btn-secondary" style="margin-left:16px;color:var(--terra);font-weight:700;text-decoration:none;font-size:15px;padding:14px 0;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">Napište mi →</a>
+        <a href="#kontakt" style="margin-left:16px;color:var(--terra);font-weight:700;text-decoration:none;font-size:15px;padding:14px 0;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">Napište mi</a>
       </div>
-      <div class="hero-status">
-        <span class="hero-status-dot"></span>
-        <span>Přijímám nové klienty · Poděbrady / online</span>
-      </div>
+
     </div>
   </div>
 </section>
@@ -1230,7 +1225,7 @@
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-a">
-          <p>Ne. Výživa, která funguje dlouhodobě, musí být udržitelná — a to znamená, že v ní musí být i prostor pro vaše oblíbená jídla. Pracujeme s tím, co jíte teď, a postupně to zlepšujeme. Extrémy mě nezajímají.</p>
+          <p>Ne. Výživa, která funguje dlouhodobě, musí být udržitelná — a to znamená, že v ní musí být i prostor pro vaše oblíbená jídla. Pracujeme s tím, co jíte teď, a postupně to zlepšujeme.</p>
         </div>
       </div>
       <div class="faq-item">
@@ -1239,16 +1234,7 @@
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-a">
-          <p>Vše funguje na dálku — konzultace probíhají přes video hovor nebo telefon, podklady dostanete e-mailem. Otázky řešíme průběžně přes e-mail nebo WhatsApp. Fyzická přítomnost není potřeba.</p>
-        </div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">
-          <span>Jak dlouho trvá, než uvidím výsledky?</span>
-          <span class="faq-icon">+</span>
-        </button>
-        <div class="faq-a">
-          <p>Záleží na cíli. Energii a lehkost pocítíte relativně brzy — někdy do dvou týdnů. Viditelné změny na tělesném složení přicházejí postupně, obvykle za 4–8 týdnů konzistentní práce. Neslibuju rychlé zázraky — slibuju udržitelné výsledky.</p>
+          <p>Vše funguje na dálku — komunikace probíhá primárně přes WhatsApp a e-mail, podklady dostanete e-mailem. Pokud bude potřeba, domluvíme se na video hovoru nebo hovoru. Fyzická přítomnost není potřeba.</p>
         </div>
       </div>
       <div class="faq-item">
@@ -1266,7 +1252,7 @@
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-a">
-          <p>Jednoduše mi napište nebo zavolejte. Řeknete mi v čem se nacházíte a co chcete změnit — a já vám doporučím, co dává smysl. Žádná nezávaznost, žádný prodejní tlak.</p>
+          <p>Stačí mi napsat — řeknete mi v čem se nacházíte a co chcete změnit. Nezávazně se pobavíme o tom, co by pro vás dávalo smysl.</p>
         </div>
       </div>
     </div>
