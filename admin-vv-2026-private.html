@@ -1,0 +1,2663 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volejník — Evidence klientů</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  :root {
+    --cream:  #FAFAF9;
+    --sage:   #4A5E3A;
+    --sage-d: #3A4D2C;
+    --terra:  #1C1C1E;
+    --peach:  #E8F0E0;
+    --white:  #FFFFFF;
+    --border: rgba(28,28,30,0.10);
+    --red:    #C0392B;
+    --serif:  'DM Sans', system-ui, sans-serif;
+    --sans:   'DM Sans', system-ui, sans-serif;
+    --r:      12px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: var(--sans); background: #F5F5F3; color: var(--terra); font-size: 15px; line-height: 1.6; }
+
+  #login-screen {
+    position: fixed; inset: 0; background: #1C2A16;
+    display: flex; align-items: center; justify-content: center; z-index: 9999;
+  }
+  .login-box {
+    background: var(--cream); border-radius: 20px; padding: 52px 48px;
+    width: 100%; max-width: 400px; text-align: center;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+  }
+  .login-logo { font-family: var(--sans); font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .login-sub  { font-size: 13px; color: rgba(28,28,30,0.5); margin-bottom: 36px; }
+  .login-box input {
+    width: 100%; background: var(--white); border: 1.5px solid var(--border);
+    border-radius: var(--r); padding: 13px 16px; font-family: var(--sans); font-size: 15px;
+    color: var(--terra); outline: none; text-align: center; letter-spacing: 0.2em;
+    transition: border-color 0.2s; margin-bottom: 16px;
+  }
+  .login-box input:focus { border-color: var(--sage); }
+  .login-btn {
+    width: 100%; background: var(--sage); color: var(--white); border: none;
+    border-radius: 50px; padding: 14px; font-family: var(--sans); font-size: 15px;
+    font-weight: 700; cursor: pointer; transition: background 0.2s;
+  }
+  .login-btn:hover { background: var(--sage-d); }
+  .login-err { font-size: 13px; color: var(--red); margin-top: 12px; display: none; }
+
+  #app { display: none; min-height: 100vh; }
+
+  header {
+    background: rgba(248,245,241,0.95); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); padding: 0 40px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-logo { font-family: var(--sans); font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .header-badge { background: var(--peach); color: var(--sage-d); border-radius: 50px; padding: 4px 14px; font-size: 12px; font-weight: 700; }
+  .conn-indicator { display: flex; align-items: center; gap: 6px; }
+  .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transition: background 0.3s; }
+  .conn-dot.online  { background: #27AE60; box-shadow: 0 0 0 3px rgba(39,174,96,0.2); }
+  .conn-dot.offline { background: var(--red); }
+  .conn-label { font-size: 12px; color: rgba(28,28,30,0.45); }
+  .logout-btn { font-size: 13px; color: rgba(28,28,30,0.4); cursor: pointer; background: none; border: none; font-family: var(--sans); transition: color 0.2s; }
+  .logout-btn:hover { color: var(--terra); }
+
+  main { padding: 40px; max-width: 1300px; margin: 0 auto; }
+
+  .config-banner {
+    background: #FEF3C7; border: 1.5px solid #F59E0B; border-radius: var(--r);
+    padding: 16px 20px; margin-bottom: 28px; font-size: 14px; color: #92400E;
+    display: none; line-height: 1.6;
+  }
+  .config-banner strong { display: block; font-size: 15px; margin-bottom: 4px; }
+  .config-banner code { background: rgba(0,0,0,0.08); padding: 1px 6px; border-radius: 4px; font-size: 13px; }
+
+  .stats-bar { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 40px; }
+  .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--r); padding: 24px 20px; }
+  .stat-num   { font-family: var(--sans); font-size: 36px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(28,28,30,0.4); }
+
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+  .toolbar-left { display: flex; align-items: center; gap: 12px; }
+  .search-input {
+    background: var(--white); border: 1.5px solid var(--border); border-radius: 50px;
+    padding: 9px 18px; font-family: var(--sans); font-size: 14px; color: var(--terra);
+    outline: none; width: 260px; transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--sage); }
+  .filter-btn {
+    background: var(--white); border: 1.5px solid var(--border); border-radius: 50px;
+    padding: 9px 18px; font-family: var(--sans); font-size: 13px; color: rgba(28,28,30,0.6);
+    cursor: pointer; transition: border-color 0.2s, color 0.2s;
+  }
+  .filter-btn.active, .filter-btn:hover { border-color: var(--sage); color: var(--terra); }
+  .filter-select {
+    background: var(--white); border: 1.5px solid var(--border); border-radius: 50px;
+    padding: 9px 16px; font-family: var(--sans); font-size: 13px; color: rgba(28,28,30,0.7);
+    cursor: pointer; outline: none; appearance: none;
+    transition: border-color 0.2s, color 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238C8B85'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 28px;
+  }
+  .filter-select:focus, .filter-select:hover { border-color: var(--sage); color: var(--terra); }
+
+  /* ── STATISTICS SECTION ── */
+  .stats-section {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .stats-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .stats-section-header:hover { background: var(--cream); }
+  .stats-section-title { font-size: 14px; font-weight: 700; color: var(--terra); letter-spacing: -0.01em; }
+  .stats-toggle-icon { font-size: 11px; color: rgba(28,28,30,0.4); transition: transform 0.2s; }
+  .stats-body { padding: 0 20px 20px; border-top: 1px solid var(--border); }
+  .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 16px; }
+  .stats-col { }
+  .stats-subtitle { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28,28,30,0.4); margin-bottom: 10px; }
+  .stat-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .stat-bar-label { font-size: 13px; color: var(--terra); min-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .stat-bar-fill { height: 100%; background: var(--sage); border-radius: 3px; transition: width 0.4s ease; }
+  .stat-bar-count { font-size: 12px; font-weight: 700; color: var(--terra); min-width: 24px; text-align: right; }
+  .add-btn {
+    background: var(--sage); color: var(--white); border: none; border-radius: 50px;
+    padding: 10px 24px; font-family: var(--sans); font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px;
+  }
+  .add-btn:hover { background: var(--sage-d); }
+
+  .table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--cream); border-bottom: 1px solid var(--border); }
+  thead th { padding: 12px 20px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28,28,30,0.45); }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; cursor: pointer; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #FDFCFA; }
+  tbody td { padding: 14px 20px; font-size: 14px; }
+  .client-name  { font-weight: 700; }
+  .client-email { font-size: 13px; color: rgba(28,28,30,0.5); margin-top: 2px; }
+
+  .badge       { display: inline-block; padding: 3px 10px; border-radius: 50px; font-size: 11px; font-weight: 700; }
+  .badge-active { background: #E8F5E9; color: #1B5E20; }
+  .badge-new    { background: var(--peach); color: #7B3F00; }
+  .badge-done   { background: #F3F4F6; color: #6B7280; }
+
+  .bmi-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; }
+  .bmi-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Vertical column dividers */
+  td.col-div, th.col-div {
+    position: relative;
+  }
+  td.col-div::before, th.col-div::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 65%;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .action-btns { display: flex; gap: 8px; }
+  .btn-sm {
+    padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700;
+    cursor: pointer; border: 1px solid var(--border); font-family: var(--sans);
+    transition: background 0.15s, border-color 0.15s; background: var(--white); color: var(--terra);
+  }
+  .btn-sm:hover        { background: var(--cream); border-color: var(--sage); }
+  .btn-sm.danger:hover { background: #FEE2E2; border-color: var(--red); color: var(--red); }
+
+  .empty-state { text-align: center; padding: 64px 20px; color: rgba(28,28,30,0.35); }
+  .empty-state p { font-size: 15px; margin-top: 8px; }
+  .loading-row td { text-align: center; padding: 48px; color: rgba(28,28,30,0.4); }
+
+  .spinner {
+    display: inline-block; width: 20px; height: 20px;
+    border: 2.5px solid var(--border); border-top-color: var(--sage);
+    border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(28,28,30,0.4); backdrop-filter: blur(4px);
+    z-index: 200; display: flex; align-items: center; justify-content: center;
+    padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--white); border-radius: 20px; padding: 40px;
+    width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto;
+    transform: translateY(16px); transition: transform 0.2s;
+    box-shadow: 0 24px 64px rgba(28,28,30,0.2);
+  }
+  .modal-backdrop.open .modal { transform: translateY(0); }
+  .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; }
+  .modal-title  { font-family: var(--serif); font-size: 24px; font-weight: 700; }
+  .modal-sub    { font-size: 13px; color: rgba(28,28,30,0.45); margin-top: 4px; }
+  .modal-close  {
+    background: var(--cream); border: none; border-radius: 8px; width: 32px; height: 32px;
+    cursor: pointer; font-size: 16px; color: rgba(28,28,30,0.5);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s;
+  }
+  .modal-close:hover { background: var(--border); }
+
+  .form-section       { border-top: 1px solid var(--border); padding-top: 24px; margin-top: 24px; }
+  .form-section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28,28,30,0.4); margin-bottom: 16px; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .form-group  { display: flex; flex-direction: column; gap: 6px; }
+  .form-label  { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(28,28,30,0.45); }
+  .form-input, .form-select, .form-textarea {
+    background: var(--cream); border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 11px 14px; font-family: var(--sans); font-size: 14px; color: var(--terra);
+    outline: none; transition: border-color 0.2s, background 0.2s; width: 100%;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--sage); background: var(--white); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-select   { appearance: none; cursor: pointer; }
+
+  .results-grid  { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 16px; }
+  .result-card   { border-radius: 10px; padding: 16px; text-align: center; }
+  .result-card.bmi-card  { background: var(--peach); }
+  .result-card.bmr-card  { background: #E8F5E9; }
+  .result-card.tdee-card { background: #EEF2FF; }
+  .result-val   { font-family: var(--serif); font-size: 28px; font-weight: 700; line-height: 1; }
+  .result-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(28,28,30,0.5); margin-top: 4px; }
+  .result-note  { font-size: 11px; color: rgba(28,28,30,0.5); margin-top: 4px; }
+
+  .bmi-bar-wrap  { margin-top: 16px; }
+  .bmi-bar-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(28,28,30,0.4); margin-bottom: 6px; }
+  .bmi-bar-track { height: 8px; border-radius: 4px; position: relative; margin-bottom: 4px; background: linear-gradient(to right,#60A5FA 0%,#34D399 25%,#FBBF24 50%,#F97316 75%,#EF4444 100%); }
+  .bmi-bar-pointer { position: absolute; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--terra); border: 2px solid var(--white); transform: translateX(-50%); transition: left 0.4s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+  .bmi-bar-labels { display: flex; justify-content: space-between; font-size: 10px; color: rgba(28,28,30,0.4); }
+
+  .modal-footer { display: flex; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); justify-content: flex-end; }
+  .btn-cancel {
+    background: var(--cream); border: 1px solid var(--border); border-radius: 50px;
+    padding: 11px 24px; font-family: var(--sans); font-size: 14px; font-weight: 700;
+    cursor: pointer; color: rgba(28,28,30,0.6); transition: background 0.15s;
+  }
+  .btn-cancel:hover { background: var(--border); }
+  .btn-save {
+    background: var(--sage); color: var(--white); border: none; border-radius: 50px;
+    padding: 11px 28px; font-family: var(--sans); font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: background 0.2s, opacity 0.2s;
+    min-width: 140px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-save:hover    { background: var(--sage-d); }
+  .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .detail-modal { max-width: 720px; }
+  .detail-name  { font-family: var(--serif); font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+  .detail-meta  { font-size: 13px; color: rgba(28,28,30,0.5); }
+  .detail-tabs  { display: flex; gap: 4px; margin: 20px 0 24px; }
+  .detail-tab { padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; background: none; color: rgba(28,28,30,0.45); font-family: var(--sans); transition: background 0.15s, color 0.15s; }
+  .detail-tab.active { background: var(--cream); color: var(--terra); }
+  .detail-tab:hover:not(.active) { color: var(--terra); }
+  .detail-panel        { display: none; }
+  .detail-panel.active { display: block; }
+
+  .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .info-row:last-child  { border-bottom: none; }
+  .info-row-label { color: rgba(28,28,30,0.5); }
+  .info-row-val   { font-weight: 700; }
+
+  .notes-area { width: 100%; background: var(--cream); border: 1.5px solid var(--border); border-radius: 10px; padding: 14px; font-family: var(--sans); font-size: 14px; color: var(--terra); outline: none; resize: vertical; min-height: 140px; transition: border-color 0.2s; }
+  .notes-area:focus { border-color: var(--sage); }
+
+  .toast { position: fixed; bottom: 32px; right: 32px; background: var(--terra); color: var(--cream); padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; z-index: 9999; transform: translateY(60px); opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── NUTRITION PLAN ── */
+  .nutrition-section { margin-bottom: 20px; }
+  .nutrition-section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28,28,30,0.4); margin-bottom: 10px; }
+  .nutrition-kcal-row { display: flex; align-items: center; gap: 12px; background: var(--cream); border-radius: var(--r); padding: 16px 20px; margin-bottom: 16px; flex-wrap: wrap; }
+  .nutrition-kcal-block { display: flex; flex-direction: column; }
+  .nutrition-kcal-val { font-family: var(--serif); font-size: 28px; font-weight: 700; color: var(--terra); line-height: 1; }
+  .nutrition-kcal-label { font-size: 11px; color: rgba(28,28,30,0.45); margin-top: 3px; }
+  .nutrition-kcal-sep { color: rgba(28,28,30,0.2); font-size: 24px; margin: 0 4px; }
+  .nutrition-custom-wrap { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .nutrition-custom-input { width: 110px; background: var(--white); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 12px; font-family: var(--sans); font-size: 15px; color: var(--terra); outline: none; text-align: center; transition: border-color 0.2s; }
+  .nutrition-custom-input:focus { border-color: var(--sage); }
+  .nutrition-custom-btn { background: var(--sage); color: var(--white); border: none; border-radius: 8px; padding: 8px 16px; font-family: var(--sans); font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+  .nutrition-custom-btn:hover { background: var(--sage-d); }
+  .nutrition-custom-clear { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-family: var(--sans); font-size: 12px; color: rgba(28,28,30,0.5); cursor: pointer; }
+  .nutrition-note { font-size: 12px; color: rgba(28,28,30,0.45); font-style: italic; margin-top: 6px; }
+
+  .macro-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  .macro-table th { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(28,28,30,0.4); padding: 8px 12px; text-align: left; border-bottom: 2px solid var(--border); }
+  .macro-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--terra); }
+  .macro-table tr:last-child td { border-bottom: none; }
+  .macro-table .macro-name { font-weight: 700; }
+  .macro-table .macro-bar-cell { width: 120px; }
+  .macro-bar-wrap { background: var(--border); border-radius: 4px; height: 6px; overflow: hidden; }
+  .macro-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+
+  .vit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .vit-card { background: var(--cream); border-radius: 10px; padding: 12px 14px; }
+  .vit-name { font-size: 12px; font-weight: 700; color: var(--terra); margin-bottom: 2px; }
+  .vit-ddd { font-size: 11px; color: rgba(28,28,30,0.5); }
+  .vit-note { font-size: 11px; color: var(--sage); margin-top: 4px; line-height: 1.4; }
+  .vit-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 50px; margin-top: 4px; }
+  .vit-tag-sport { background: #DBEAFE; color: #1E40AF; }
+  .vit-tag-women { background: #FCE7F3; color: #9D174D; }
+  .vit-tag-key { background: #D1FAE5; color: #065F46; }
+
+  /* ── FOOD DIARY ── */
+  .diary-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .diary-split { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .diary-col { background:var(--cream); border-radius:var(--r); padding:16px; min-height:200px; }
+  .diary-col-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .diary-col-title { font-size:13px; font-weight:700; color:var(--terra); }
+  .diary-date-filter { background:var(--white); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font-family:var(--sans); font-size:12px; color:var(--terra); outline:none; cursor:pointer; }
+  .diary-empty { font-size:13px; color:rgba(28,28,30,0.35); line-height:1.6; text-align:center; padding:24px 0; }
+
+  .diary-day-group { margin-bottom:16px; }
+  .diary-day-label { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(28,28,30,0.4); margin-bottom:8px; display:flex; justify-content:space-between; }
+  .diary-day-total { font-size:11px; color:var(--sage); font-weight:700; }
+  .diary-entry { background:var(--white); border-radius:8px; padding:10px 12px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:flex-start; }
+  .diary-entry-left { flex:1; }
+  .diary-entry-meal { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--sage); margin-bottom:2px; }
+  .diary-entry-desc { font-size:13px; font-weight:700; color:var(--terra); }
+  .diary-entry-macros { font-size:11px; color:rgba(28,28,30,0.45); margin-top:2px; }
+  .diary-entry-right { display:flex; align-items:center; gap:8px; flex-shrink:0; margin-left:10px; }
+  .diary-entry-kcal { font-family:var(--serif); font-size:16px; font-weight:700; color:var(--terra); }
+  .diary-entry-del { background:none; border:none; cursor:pointer; color:rgba(28,28,30,0.25); font-size:14px; transition:color 0.15s; padding:2px; }
+  .diary-entry-del:hover { color:var(--red); }
+
+  .diary-source-badge { font-size:10px; padding:2px 7px; border-radius:50px; font-weight:700; }
+  .diary-source-advisor { background:var(--sage-light); color:var(--sage-d); }
+  .diary-source-client  { background:var(--peach); color:#7B3F00; }
+
+  /* ── AI ADVISOR ── */
+  .ai-panel { display:flex; flex-direction:column; height:500px; }
+  .ai-intro { background:linear-gradient(135deg,var(--terra) 0%,#5A3A3A 100%); border-radius:var(--r); padding:16px 20px; margin-bottom:16px; color:var(--cream); display:flex; align-items:center; gap:12px; }
+  .ai-intro-icon { font-size:28px; flex-shrink:0; }
+  .ai-intro-text { font-size:13px; line-height:1.5; }
+  .ai-intro-title { font-weight:700; font-size:14px; margin-bottom:2px; }
+  .ai-messages { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:12px; margin-bottom:12px; padding-right:4px; }
+  .ai-msg { max-width:85%; display:flex; gap:8px; align-items:flex-start; }
+  .ai-msg.user { align-self:flex-end; flex-direction:row-reverse; }
+  .ai-msg-avatar { width:28px; height:28px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+  .ai-msg.assistant .ai-msg-avatar { background:var(--terra); color:var(--cream); }
+  .ai-msg.user .ai-msg-avatar { background:var(--sage); color:var(--white); }
+  .ai-msg-bubble { background:var(--cream); border-radius:12px; border-top-left-radius:3px; padding:10px 14px; font-size:13px; line-height:1.6; color:var(--terra); }
+  .ai-msg.user .ai-msg-bubble { background:var(--sage); color:var(--white); border-top-left-radius:12px; border-top-right-radius:3px; }
+  .ai-msg-bubble strong { font-weight:700; }
+  .ai-msg-bubble ul { margin:6px 0 0 16px; }
+  .ai-msg-bubble li { margin-bottom:3px; }
+  .ai-typing { display:flex; gap:4px; padding:4px 0; }
+  .ai-typing span { width:7px; height:7px; background:rgba(28,28,30,0.3); border-radius:50%; animation:bounce 1.2s infinite; }
+  .ai-typing span:nth-child(2) { animation-delay:0.2s; }
+  .ai-typing span:nth-child(3) { animation-delay:0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+  .ai-input-row { display:flex; gap:8px; }
+  .ai-input { flex:1; background:var(--cream); border:1.5px solid var(--border); border-radius:50px; padding:10px 16px; font-family:var(--sans); font-size:13px; color:var(--terra); outline:none; transition:border-color 0.2s; }
+  .ai-input:focus { border-color:var(--sage); background:var(--white); }
+  .ai-send-btn { background:var(--terra); color:var(--cream); border:none; border-radius:50px; padding:10px 20px; font-family:var(--sans); font-size:13px; font-weight:700; cursor:pointer; transition:background 0.2s; white-space:nowrap; }
+  .ai-send-btn:hover { background:#2A1A1A; }
+  .ai-send-btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .ai-quick-btns { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .ai-quick-btn { background:var(--white); border:1.5px solid var(--border); border-radius:50px; padding:5px 12px; font-family:var(--sans); font-size:12px; color:rgba(28,28,30,0.65); cursor:pointer; transition:border-color 0.2s; }
+  .ai-quick-btn:hover { border-color:var(--sage); color:var(--terra); }
+
+  /* ── DOCUMENTS ── */
+  .docs-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+
+  .upload-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--sage); color: var(--white); border-radius: 50px;
+    padding: 8px 20px; font-family: var(--sans); font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .upload-btn:hover { background: var(--sage-d); }
+
+  .upload-progress-wrap {
+    background: var(--cream); border-radius: 8px; padding: 12px 16px;
+    margin-bottom: 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .upload-progress-bar {
+    flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+    position: relative;
+  }
+  .upload-progress-bar::after {
+    content: ''; position: absolute; inset: 0;
+    background: var(--sage); border-radius: 3px;
+    width: var(--prog, 0%); transition: width 0.3s ease;
+  }
+  #upload-progress-label { font-size: 13px; color: rgba(28,28,30,0.6); white-space: nowrap; }
+
+  .doc-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; background: var(--white);
+    border: 1px solid var(--border); border-radius: var(--r);
+    margin-bottom: 10px; transition: box-shadow 0.15s;
+  }
+  .doc-item:hover { box-shadow: 0 2px 12px rgba(28,28,30,0.07); }
+  .doc-item-left { display: flex; align-items: center; gap: 12px; }
+  .doc-icon {
+    width: 40px; height: 40px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .doc-icon.pdf  { background: #FEE2E2; }
+  .doc-icon.img  { background: #E0F2FE; }
+  .doc-icon.word { background: #DBEAFE; }
+  .doc-icon.other{ background: var(--cream); }
+  .doc-name { font-weight: 700; font-size: 14px; }
+  .doc-meta { font-size: 12px; color: rgba(28,28,30,0.45); margin-top: 2px; }
+  .doc-actions { display: flex; gap: 8px; }
+  .doc-open-btn {
+    background: var(--sage); color: var(--white); border: none; border-radius: 6px;
+    padding: 6px 14px; font-family: var(--sans); font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: background 0.15s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .doc-open-btn:hover { background: var(--sage-d); }
+
+  .docs-empty { text-align: center; padding: 48px 20px; color: rgba(28,28,30,0.35); }
+  .docs-empty p { font-size: 14px; margin-top: 8px; line-height: 1.6; }
+
+  /* ── PROGRESS ── */
+  .progress-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .weight-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .weight-table th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(28,28,30,0.4); background: var(--cream); border-bottom: 1px solid var(--border); }
+  .weight-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .weight-table tr:last-child td { border-bottom: none; }
+
+  .body-comp-charts { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 8px; }
+  .body-comp-chart-wrap { background: var(--cream); border-radius: var(--r); padding: 14px; }
+  .body-comp-chart-label { font-size: 12px; font-weight: 700; color: rgba(28,28,30,0.5); margin-bottom: 10px; }
+  .change-up   { color: #27AE60; font-weight: 700; }
+  .change-down { color: var(--red); font-weight: 700; }
+  .change-same { color: rgba(28,28,30,0.4); }
+
+  /* ── MACROS ── */
+  .macros-goal-card {
+    background: linear-gradient(135deg, var(--sage) 0%, var(--sage-d) 100%);
+    border-radius: var(--r); padding: 24px 28px; margin-bottom: 24px; color: var(--white);
+  }
+  .macros-goal-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; margin-bottom: 6px; }
+  .macros-goal-name  { font-family: var(--serif); font-size: 24px; font-weight: 700; }
+  .macros-goal-sub   { font-size: 13px; opacity: 0.75; margin-top: 4px; }
+
+  .macros-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+  .macro-card  { border-radius: var(--r); padding: 20px 16px; text-align: center; border: 1px solid var(--border); }
+  .macro-card.protein { background: #FEF3C7; border-color: #FDE68A; }
+  .macro-card.carbs   { background: #D1FAE5; border-color: #A7F3D0; }
+  .macro-card.fat     { background: #EEF2FF; border-color: #C7D2FE; }
+  .macro-val   { font-family: var(--serif); font-size: 28px; font-weight: 700; color: var(--terra); line-height: 1; }
+  .macro-unit  { font-size: 12px; color: rgba(28,28,30,0.5); margin-top: 2px; }
+  .macro-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(28,28,30,0.5); margin-top: 8px; }
+  .macro-note  { font-size: 11px; color: rgba(28,28,30,0.45); margin-top: 4px; }
+
+  .macros-kcal-bar {
+    background: var(--cream); border-radius: var(--r); padding: 16px 20px; margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .macros-kcal-label { font-size: 13px; color: rgba(28,28,30,0.6); }
+  .macros-kcal-val   { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--terra); }
+  .macros-note-box   { background: var(--peach); border-radius: var(--r); padding: 14px 16px; font-size: 13px; color: var(--terra); line-height: 1.6; }
+  .macros-no-data    { text-align: center; padding: 48px 20px; color: rgba(28,28,30,0.35); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ╔══════════════════════════════════════════╗
+     ║  KONFIGURACE — vyplňte vaše údaje níže  ║
+     ╚══════════════════════════════════════════╝ -->
+<script>
+  const SUPABASE_URL = 'https://tgthwepwelukrdyjfwsd.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_gk7PtV1JC7GTf3TC2S4roQ_3ul03xHb';
+  const APP_PASSWORD = 'VoVo*10#2003';
+</script>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Vojtěch Volejník</div>
+    <div class="login-sub">Evidence klientů · Pouze pro poradce</div>
+    <input type="password" id="pwd-input" placeholder="Heslo"
+           onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">Vstoupit</button>
+    <div class="login-err" id="login-err">Špatné heslo, zkuste znovu.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="header-logo">Evidence klientů</div>
+    <div class="header-right">
+      <a href="stranky.html" target="_blank" style="font-size:13px;color:rgba(28,28,30,0.5);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color 0.2s" onmouseover="this.style.color='var(--terra)'" onmouseout="this.style.color='rgba(28,28,30,0.5)'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Web
+      </a>
+      <div class="conn-indicator">
+        <div class="conn-dot" id="conn-dot"></div>
+        <span class="conn-label" id="conn-label">Připojování…</span>
+      </div>
+      <div class="header-badge">🌿 Poradce</div>
+      <button class="logout-btn" onclick="logout()">Odhlásit</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="config-banner" id="config-banner">
+      <strong>⚠️ Supabase není nakonfigurováno</strong>
+      Otevřete soubor a vyplňte <code>SUPABASE_URL</code> a <code>SUPABASE_KEY</code>.
+      Data se zatím ukládají pouze lokálně v tomto prohlížeči.
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Celkem klientů</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-active">—</div><div class="stat-label">Aktivních</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-new">—</div><div class="stat-label">Nových (tento měsíc)</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-data">—</div><div class="stat-label">Se zadanými hodnotami</div></div>
+    </div>
+
+    <!-- STATISTIKY -->
+    <div class="stats-section" id="stats-section">
+      <div class="stats-section-header" onclick="toggleStats()">
+        <span class="stats-section-title">📊 Statistiky</span>
+        <span class="stats-toggle-icon" id="stats-toggle-icon" style="transform:rotate(180deg)">▼</span>
+      </div>
+      <div class="stats-body" id="stats-body" style="display:block">
+        <div class="stats-row">
+          <div class="stats-col">
+            <div class="stats-subtitle">Podle služby</div>
+            <div id="stats-by-service"></div>
+          </div>
+          <div class="stats-col">
+            <div class="stats-subtitle">Podle cíle</div>
+            <div id="stats-by-goal"></div>
+          </div>
+          <div class="stats-col">
+            <div class="stats-subtitle">Podle stavu</div>
+            <div id="stats-by-status"></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:rgba(28,28,30,0.35);margin-top:12px">
+          Statistiky odpovídají aktuálně aktivním filtrům.
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <input class="search-input" id="search" type="text"
+               placeholder="🔍  Hledat klienta…" oninput="renderTable()">
+        <select class="filter-select" id="f-filter-status" onchange="renderTable()">
+          <option value="">Všechny stavy</option>
+          <option value="new">Nový</option>
+          <option value="active">Aktivní</option>
+          <option value="done">Ukončen</option>
+        </select>
+        <select class="filter-select" id="f-filter-gender" onchange="renderTable()">
+          <option value="">Obě pohlaví</option>
+          <option value="M">Muž</option>
+          <option value="F">Žena</option>
+        </select>
+        <select class="filter-select" id="f-filter-goal" onchange="renderTable()">
+          <option value="">Všechny cíle</option>
+          <option value="loss">Hubnutí</option>
+          <option value="gain">Nabírání</option>
+          <option value="maintain">Udržení váhy</option>
+          <option value="health">Zdravé stravování</option>
+          <option value="sport_male">Sportovec — muž</option>
+          <option value="sport_female">Sportovkyně — žena</option>
+          <option value="other">Jiné</option>
+        </select>
+        <select class="filter-select" id="f-filter-service" onchange="renderTable()">
+          <option value="">Všechny služby</option>
+          <option>Online Start</option>
+          <option>Detailní analýza + Vzorový plán</option>
+          <option>Měsíční balíček</option>
+          <option>E-booky</option>
+          <option>Individuální plán / Volba</option>
+          <option>Individuální plán / Volba</option>
+            <option>Jiné / vlastní</option>
+        </select>
+      </div>
+      <button class="add-btn" onclick="openAddModal()">＋ Přidat klienta</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Klient</th>
+            <th class="col-div">Stav</th>
+            <th class="col-div">Cíl & Služba</th>
+            <th class="col-div">BMI</th>
+            <th class="col-div">Doporučený příjem</th>
+            <th class="col-div">BMR (kcal)</th>
+            <th class="col-div">TDEE (kcal)</th>
+            <th class="col-div">Přidán</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="client-tbody">
+          <tr class="loading-row"><td colspan="9"><span class="spinner"></span>Načítání dat…</td></tr>
+        </tbody>
+      </table>
+      <div id="empty-state" class="empty-state" style="display:none">
+        <div style="font-size:40px">📋</div>
+        <p>Zatím žádní klienti.<br>Přidejte prvního klienta tlačítkem výše.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-backdrop" id="add-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title">Nový klient</div>
+        <div class="modal-sub">Základní informace a tělesné hodnoty</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('add-modal')">✕</button>
+    </div>
+
+    <div class="form-section-title">Základní informace</div>
+    <div class="form-grid-2">
+      <div class="form-group"><label class="form-label">Jméno</label><input class="form-input" id="f-name" placeholder="Jan"></div>
+      <div class="form-group"><label class="form-label">Příjmení</label><input class="form-input" id="f-surname" placeholder="Novák"></div>
+    </div>
+    <div class="form-group" style="margin-top:14px">
+      <label class="form-label">E-mail</label>
+      <input class="form-input" id="f-email" type="email" placeholder="jan@example.com">
+    </div>
+    <div class="form-grid-2" style="margin-top:14px">
+      <div class="form-group"><label class="form-label">Telefon</label><input class="form-input" id="f-phone" placeholder="+420 …"></div>
+      <div class="form-group">
+        <label class="form-label">Stav</label>
+        <select class="form-select" id="f-status">
+          <option value="new">Nový</option>
+          <option value="active">Aktivní</option>
+          <option value="done">Ukončen</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Tělesné hodnoty</div>
+      <div class="form-grid-3">
+        <div class="form-group"><label class="form-label">Věk</label><input class="form-input" id="f-age" type="number" placeholder="30" oninput="calcMetrics()"></div>
+        <div class="form-group"><label class="form-label">Výška (cm)</label><input class="form-input" id="f-height" type="number" placeholder="175" oninput="calcMetrics()"></div>
+        <div class="form-group"><label class="form-label">Váha (kg)</label><input class="form-input" id="f-weight" type="number" placeholder="75" oninput="calcMetrics()"></div>
+      </div>
+      <div class="form-grid-2" style="margin-top:14px">
+        <div class="form-group">
+          <label class="form-label">Pohlaví</label>
+          <select class="form-select" id="f-gender" onchange="calcMetrics()">
+            <option value="">— vyberte —</option>
+            <option value="M">Muž</option>
+            <option value="F">Žena</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Aktivita</label>
+          <select class="form-select" id="f-activity" onchange="calcMetrics()">
+            <option value="1.2">Sedavý (min. pohyb)</option>
+            <option value="1.375">Lehká (1–3×/týd.)</option>
+            <option value="1.55" selected>Střední (3–5×/týd.)</option>
+            <option value="1.725">Vysoká (6–7×/týd.)</option>
+            <option value="1.9">Extrémní (2× denně)</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="metrics-results" style="display:none;margin-top:20px">
+        <div class="form-section-title" style="margin-bottom:0">Vypočítané hodnoty</div>
+        <div class="results-grid">
+          <div class="result-card bmi-card">
+            <div class="result-val" id="r-bmi">—</div>
+            <div class="result-label">BMI</div>
+            <div class="result-note" id="r-bmi-cat">—</div>
+          </div>
+          <div class="result-card bmr-card">
+            <div class="result-val" id="r-bmr">—</div>
+            <div class="result-label">BMR (kcal/den)</div>
+            <div class="result-note">Bazální metabolismus</div>
+          </div>
+          <div class="result-card tdee-card">
+            <div class="result-val" id="r-tdee">—</div>
+            <div class="result-label">TDEE (kcal/den)</div>
+            <div class="result-note">Celková potřeba</div>
+          </div>
+        </div>
+        <div class="bmi-bar-wrap" style="margin-top:16px">
+          <div class="bmi-bar-label">BMI škála</div>
+          <div class="bmi-bar-track"><div class="bmi-bar-pointer" id="bmi-pointer" style="left:0%"></div></div>
+          <div class="bmi-bar-labels">
+            <span>Podváha &lt;18.5</span><span>Norma 18.5–25</span>
+            <span>Nadváha 25–30</span><span>Obezita &gt;30</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:13px;color:rgba(28,28,30,0.5)">
+          Ideální váha: <strong id="r-ideal">—</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Služba & Cíl</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Požadovaná služba</label>
+          <select class="form-select" id="f-service">
+            <option value="">— vyberte nebo napište —</option>
+            <option>Online Start</option>
+            <option>Detailní analýza + Vzorový plán</option>
+            <option>Měsíční balíček</option>
+            <option>E-booky</option>
+            <option>Individuální plán / Volba</option>
+          <option>Jiné / vlastní</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cíl klienta</label>
+          <select class="form-select" id="f-goal" onchange="calcMetrics()">
+            <option value="">— vyberte —</option>
+            <option value="loss">Hubnutí</option>
+            <option value="gain">Nabírání svalové hmoty</option>
+            <option value="maintain">Udržení váhy</option>
+            <option value="health">Zdravé stravování</option>
+            <option value="sport_male">Sportovec — muž</option>
+            <option value="sport_female">Sportovkyně — žena</option>
+            <option value="other">Jiné</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Zdravotní informace</div>
+      <div class="form-group">
+        <label class="form-label">Nemoci & zdravotní omezení</label>
+        <textarea class="form-textarea" id="f-diseases" style="min-height:60px" placeholder="např. diabetes 2. typu, hypertenze, hypothyreóza…"></textarea>
+      </div>
+      <div class="form-group" style="margin-top:14px">
+        <label class="form-label">Alergie & intolerance</label>
+        <textarea class="form-textarea" id="f-allergies" style="min-height:60px" placeholder="např. laktóza, lepek, ořechy…"></textarea>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Poznámky</div>
+      <textarea class="form-textarea" id="f-notes" placeholder="Zdravotní omezení, cíle, preference, alergie…"></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('add-modal')">Zrušit</button>
+      <button class="btn-save" id="save-btn" onclick="saveClient()">
+        <span id="save-txt">Uložit klienta</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-backdrop" id="detail-modal">
+  <div class="modal detail-modal">
+    <div class="modal-header">
+      <div>
+        <div class="detail-name" id="d-name">—</div>
+        <div class="detail-meta" id="d-meta">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
+    </div>
+    <div class="detail-tabs">
+      <button class="detail-tab active" onclick="switchTab('overview',this)">Přehled</button>
+      <button class="detail-tab" onclick="switchTab('metrics',this)">Výpočty</button>
+      <button class="detail-tab" onclick="switchTab('progress',this)">📈 Vývoj</button>
+      <button class="detail-tab" onclick="switchTab('macros',this)">🥗 Makra</button>
+      <button class="detail-tab" onclick="switchTab('nutrition',this)">🎯 Příjem</button>
+      <button class="detail-tab" onclick="switchTab('diary',this)">🍽 Deník</button>
+      <button class="detail-tab" onclick="switchTab('ai',this)">🤖 AI Poradce</button>
+      <button class="detail-tab" onclick="switchTab('docs',this)">📄 Dokumenty</button>
+      <button class="detail-tab" onclick="switchTab('notes',this)">Poznámky</button>
+    </div>
+    <div class="detail-panel active" id="tab-overview"><div id="d-info-rows"></div></div>
+    <div class="detail-panel" id="tab-metrics"><div id="d-metrics-content"></div></div>
+
+    <!-- VÝVOJ HMOTNOSTI TAB -->
+    <div class="detail-panel" id="tab-progress">
+      <div class="progress-toolbar">
+        <p style="font-size:13px;color:rgba(28,28,30,0.5)">Tělesná kompozice klienta</p>
+        <button class="add-recipe-btn" onclick="openWeightModal()">＋ Zapsat měření</button>
+      </div>
+      <div class="body-comp-charts">
+        <div class="body-comp-chart-wrap">
+          <div class="body-comp-chart-label">⚖️ Hmotnost (kg)</div>
+          <canvas id="weight-chart" style="max-height:180px"></canvas>
+        </div>
+        <div class="body-comp-chart-wrap">
+          <div class="body-comp-chart-label">🔥 Tělesný tuk (%)</div>
+          <canvas id="fat-chart" style="max-height:180px"></canvas>
+        </div>
+        <div class="body-comp-chart-wrap">
+          <div class="body-comp-chart-label">💪 Svalová hmota (kg)</div>
+          <canvas id="muscle-chart" style="max-height:180px"></canvas>
+        </div>
+      </div>
+      <div id="weight-table-wrap" style="display:none;margin-top:20px">
+        <table class="weight-table">
+          <thead><tr><th>Datum</th><th>Hmotnost</th><th>Δ Hmot.</th><th>Těl. tuk</th><th>Δ Tuk</th><th>Sval. hm.</th><th>Δ Sval</th><th>Poznámka</th><th></th></tr></thead>
+          <tbody id="weight-tbody"></tbody>
+        </table>
+      </div>
+      <div id="weight-empty" style="text-align:center;padding:48px 20px;color:rgba(28,28,30,0.35);display:none">
+        <div style="font-size:32px">📊</div>
+        <p style="margin-top:8px;font-size:14px">Zatím žádné záznamy.<br>Přidejte první měření tlačítkem výše.</p>
+      </div>
+      <div id="weight-loading" style="text-align:center;padding:32px;color:rgba(28,28,30,0.4)">
+        <span class="spinner"></span> Načítání…
+      </div>
+    </div>
+
+    <!-- MAKRA TAB -->
+    <div class="detail-panel" id="tab-macros">
+      <div id="macros-content"></div>
+    </div>
+
+    <div class="detail-panel" id="tab-notes">
+      <textarea class="notes-area" id="d-notes-area"
+                placeholder="Poznámky k tomuto klientovi…"
+                oninput="scheduleNotesSave()"></textarea>
+      <p style="font-size:12px;color:rgba(28,28,30,0.35);margin-top:8px" id="notes-status">Automaticky ukládáno</p>
+    </div>
+
+
+    <!-- PŘÍJEM TAB -->
+    <div class="detail-panel" id="tab-nutrition">
+      <div id="nutrition-content"></div>
+    </div>
+
+    <!-- DENÍK STRAVY TAB -->
+    <div class="detail-panel" id="tab-diary">
+      <div class="diary-toolbar">
+        <p style="font-size:13px;color:rgba(28,28,30,0.5)">Záznamy stravy klienta</p>
+        <button class="add-recipe-btn" onclick="openDiaryModal()">＋ Přidat záznam</button>
+      </div>
+      <div id="diary-advisor-list"><div class="diary-empty">Zatím žádné záznamy.</div></div>
+      <div id="diary-loading" style="text-align:center;padding:32px;color:rgba(28,28,30,0.4);display:none">
+        <span class="spinner"></span> Načítání deníku…
+      </div>
+    </div>
+
+    <!-- AI ADVISOR TAB -->
+    <div class="detail-panel" id="tab-ai">
+      <div class="ai-panel" id="ai-panel">
+        <div class="ai-intro">
+          <div class="ai-intro-icon">🤖</div>
+          <div class="ai-intro-text">
+            <div class="ai-intro-title">AI Poradce pro výživu</div>
+            Analyzuji profil klienta a radím na základě vašich odborných dokumentů. Ptejte se na sestavení jídelníčku, rizika, kontraindikace nebo suplementaci.
+          </div>
+        </div>
+        <div class="ai-quick-btns" id="ai-quick-btns">
+          <button class="ai-quick-btn" onclick="aiQuick('Na co si dát pozor při sestavování jídelníčku pro tohoto klienta?')">⚠️ Na co si dát pozor?</button>
+          <button class="ai-quick-btn" onclick="aiQuick('Jaká suplementace je vhodná pro tohoto klienta?')">💊 Vhodná suplementace</button>
+          <button class="ai-quick-btn" onclick="aiQuick('Jaký stravovací přístup doporučuješ pro dosažení jeho cíle?')">🥗 Stravovací přístup</button>
+          <button class="ai-quick-btn" onclick="aiQuick('Jaké potraviny by měl klient vyloučit nebo omezit?')">🚫 Co vyloučit?</button>
+          <button class="ai-quick-btn" onclick="aiQuick('Jaký je vliv jeho nemoci na stravování?')">🏥 Vliv nemoci</button>
+        </div>
+        <div class="ai-messages" id="ai-messages">
+          <div class="ai-msg assistant">
+            <div class="ai-msg-avatar">VV</div>
+            <div class="ai-msg-bubble">Vyberte klienta a zeptejte se na cokoliv ohledně jeho výživy. Pracuji s jeho profilem (věk, váha, pohlaví, alergií, nemocemi, cílem) a vašimi odbornými materiály.</div>
+          </div>
+        </div>
+        <div class="ai-input-row">
+          <input class="ai-input" id="ai-input" type="text" placeholder="Zeptejte se na výživu klienta…" onkeydown="if(event.key==='Enter')sendAiMessage()">
+          <button class="ai-send-btn" id="ai-send-btn" onclick="sendAiMessage()">Odeslat</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOKUMENTY TAB -->
+    <div class="detail-panel" id="tab-docs">
+      <div class="docs-toolbar">
+        <p style="font-size:13px;color:rgba(28,28,30,0.5)">PDF soubory nahrané k tomuto klientovi</p>
+        <label class="upload-btn" id="upload-label">
+          ＋ Nahrát PDF
+          <input type="file" id="doc-file-input" accept=".pdf,.doc,.docx,.jpg,.png"
+                 style="display:none" onchange="uploadDocument(this)">
+        </label>
+      </div>
+      <div id="upload-progress" style="display:none" class="upload-progress-wrap">
+        <div class="upload-progress-bar" id="upload-progress-bar"></div>
+        <span id="upload-progress-label">Nahrávání…</span>
+      </div>
+      <div id="docs-list">
+        <div class="docs-empty" id="docs-empty" style="display:none">
+          <div style="font-size:32px">📄</div>
+          <p>Zatím žádné dokumenty.<br>Nahrajte první soubor tlačítkem výše.</p>
+        </div>
+        <div id="docs-loading" style="text-align:center;padding:32px;color:rgba(28,28,30,0.4)">
+          <span class="spinner"></span> Načítání dokumentů…
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('detail-modal')">Zavřít</button>
+      <button class="btn-save" onclick="editCurrent()">✏️ Upravit</button>
+    </div>
+  </div>
+</div>
+
+<!-- DIARY ENTRY MODAL -->
+<div class="modal-backdrop" id="diary-modal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Přidat záznam stravy</div>
+        <div class="modal-sub" id="diary-modal-sub">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('diary-modal')">✕</button>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Datum</label>
+        <input class="form-input" id="di-date" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jídlo</label>
+        <select class="form-select" id="di-meal">
+          <option value="Snídaně">Snídaně</option>
+          <option value="Svačina">Svačina</option>
+          <option value="Oběd">Oběd</option>
+          <option value="Odpolední svačina">Odpolední svačina</option>
+          <option value="Večeře">Večeře</option>
+          <option value="Jiné">Jiné</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:14px">
+      <label class="form-label">Popis / Potraviny</label>
+      <textarea class="form-textarea" id="di-desc" style="min-height:70px" placeholder="např. ovesná kaše s borůvkami, 300 ml…"></textarea>
+    </div>
+    <div class="form-grid-2" style="margin-top:14px">
+      <div class="form-group">
+        <label class="form-label">Kalorie (kcal)</label>
+        <input class="form-input" id="di-kcal" type="number" placeholder="350">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bílkoviny (g)</label>
+        <input class="form-input" id="di-protein" type="number" placeholder="12">
+      </div>
+    </div>
+    <div class="form-grid-2" style="margin-top:14px">
+      <div class="form-group">
+        <label class="form-label">Sacharidy (g)</label>
+        <input class="form-input" id="di-carbs" type="number" placeholder="45">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tuky (g)</label>
+        <input class="form-input" id="di-fat" type="number" placeholder="8">
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:14px">
+      <label class="form-label">Poznámka</label>
+      <input class="form-input" id="di-note" placeholder="volitelná poznámka…">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('diary-modal')">Zrušit</button>
+      <button class="btn-save" id="diary-save-btn" onclick="saveDiaryEntry()">
+        <span id="diary-save-txt">Uložit záznam</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- WEIGHT ENTRY MODAL -->
+<div class="modal-backdrop" id="weight-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Zapsat měření těla</div>
+        <div class="modal-sub" id="weight-modal-sub">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('weight-modal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Datum</label>
+      <input class="form-input" id="w-date" type="date">
+    </div>
+    <div class="form-grid-2" style="margin-top:14px">
+      <div class="form-group">
+        <label class="form-label">Hmotnost (kg)</label>
+        <input class="form-input" id="w-weight" type="number" step="0.1" placeholder="75.5">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tělesný tuk (%)</label>
+        <input class="form-input" id="w-fat" type="number" step="0.1" placeholder="18.5">
+      </div>
+    </div>
+    <div class="form-grid-2" style="margin-top:14px">
+      <div class="form-group">
+        <label class="form-label">Kosterní svalová hmota (kg)</label>
+        <input class="form-input" id="w-muscle" type="number" step="0.1" placeholder="34.2">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Poznámka</label>
+        <input class="form-input" id="w-note" placeholder="volitelná poznámka…">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('weight-modal')">Zrušit</button>
+      <button class="btn-save" id="weight-save-btn" onclick="saveWeight()">
+        <span id="weight-save-txt">Uložit</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ STATE ══
+let sb = null, clients = [], editingId = null, detailId = null;
+let filterState = 'all', notesTimer = null, useSupabase = false;
+const LOCAL_KEY = 'vv_clients_v2';
+
+// ══ INIT ══
+function initSupabase() {
+  if (SUPABASE_URL.includes('VAŠE') || SUPABASE_KEY.includes('VAŠE')) {
+    document.getElementById('config-banner').style.display = 'block';
+    setConn(false, 'Lokální režim');
+    return;
+  }
+  try {
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    useSupabase = true;
+  } catch(e) {
+    setConn(false, 'Chyba připojení');
+  }
+}
+
+function setConn(online, label) {
+  document.getElementById('conn-dot').className = 'conn-dot ' + (online ? 'online' : 'offline');
+  document.getElementById('conn-label').textContent = label;
+}
+
+// ══ AUTH ══
+function login() {
+  if (document.getElementById('pwd-input').value === APP_PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initSupabase();
+    loadClients();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('pwd-input').value = '';
+  }
+}
+function logout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('pwd-input').value = '';
+  clients = [];
+}
+
+// ══ DATA ══
+async function loadClients() {
+  if (useSupabase) {
+    const { data, error } = await sb.from('clients').select('*').order('created_at', { ascending: false });
+    if (error) {
+      setConn(false, 'Chyba načtení');
+      showToast('⚠️ Nelze načíst ze serveru, používám lokální data');
+      clients = localLoad();
+    } else {
+      setConn(true, 'Připojeno · Supabase');
+      clients = data || [];
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(clients));
+    }
+  } else {
+    clients = localLoad();
+  }
+  renderAll();
+}
+
+async function dbInsert(data) {
+  if (useSupabase) {
+    const { data: row, error } = await sb.from('clients').insert([data]).select().single();
+    if (error) throw error;
+    return row;
+  }
+  const row = { ...data, id: 'local_' + Date.now(), created_at: new Date().toISOString() };
+  clients.unshift(row);
+  localSave();
+  return row;
+}
+
+async function dbUpdate(id, data) {
+  if (useSupabase) {
+    const { error } = await sb.from('clients').update(data).eq('id', id);
+    if (error) throw error;
+  }
+  const i = clients.findIndex(c => c.id === id);
+  if (i !== -1) clients[i] = { ...clients[i], ...data };
+  localSave();
+}
+
+async function dbDelete(id) {
+  if (useSupabase) {
+    const { error } = await sb.from('clients').delete().eq('id', id);
+    if (error) throw error;
+  }
+  clients = clients.filter(c => c.id !== id);
+  localSave();
+}
+
+function localLoad()  { try { return JSON.parse(localStorage.getItem(LOCAL_KEY)) || []; } catch { return []; } }
+function localSave()  { localStorage.setItem(LOCAL_KEY, JSON.stringify(clients)); }
+
+// ══ CALC ══
+const calcBMI = (w,h) => w / Math.pow(h/100, 2);
+const calcBMR = (w,h,a,g) => g==='M' ? 10*w+6.25*h-5*a+5 : g==='F' ? 10*w+6.25*h-5*a-161 : null;
+
+function bmiCat(bmi) {
+  if (bmi < 18.5) return { label:'Podváha',    color:'#60A5FA' };
+  if (bmi < 25)   return { label:'Normální',   color:'#34D399' };
+  if (bmi < 30)   return { label:'Nadváha',    color:'#FBBF24' };
+  if (bmi < 35)   return { label:'Obezita I.', color:'#F97316' };
+  return              { label:'Obezita II+', color:'#EF4444' };
+}
+
+function bmiPos(bmi) { return Math.max(0,Math.min(100,((bmi-15)/25)*100)).toFixed(1)+'%'; }
+
+// ── Výpočet maker přizpůsobených TDEE a cíli ──
+// Pravidlo: doporučený příjem = TDEE ± offset, NIKDY pod BMR
+// Vrací { targetKcal, tdee, bmr, protein, carbs, fat, hasTdee, clampedToBMR }
+function calcClientMacros(c) {
+  if (!c.weight || !c.goal || !MACRO_PLANS[c.goal]) return null;
+  const plan = MACRO_PLANS[c.goal];
+  const w = +c.weight;
+
+  // BMR a TDEE
+  let bmr = null, tdee = null;
+  if (c.weight && c.height && c.age && c.gender) {
+    bmr  = calcBMR(+c.weight, +c.height, +c.age, c.gender);
+    if (bmr) tdee = Math.round(bmr * +(c.activity || 1.55));
+  }
+
+  // Protein pevně z váhy (vždy)
+  const protein     = Math.round(plan.protein.mult * w);
+  const proteinKcal = protein * 4;
+
+  let targetKcal, carbs, fat, clampedToBMR = false;
+
+  if (tdee) {
+    // Cílový příjem = TDEE ± offset
+    let raw = tdee + plan.kcalOffset;
+
+    // NIKDY pod BMR — základní energetická potřeba organismu
+    if (bmr && raw < Math.round(bmr)) {
+      raw = Math.round(bmr);
+      clampedToBMR = true;
+    }
+    targetKcal = raw;
+
+    // Zbývající kcal po proteinu rozdělíme dle carbRatio
+    const remaining = Math.max(targetKcal - proteinKcal, 0);
+    carbs = Math.round((remaining * plan.carbRatio) / 4);
+    fat   = Math.round((remaining * (1 - plan.carbRatio)) / 9);
+  } else {
+    // Bez TDEE — pevné násobitele, kontrola min. protein+základ
+    carbs      = Math.round(plan.carbs.mult * w);
+    fat        = Math.round(plan.fat.mult   * w);
+    targetKcal = proteinKcal + carbs * 4 + fat * 9;
+  }
+
+  return { targetKcal, tdee, bmr: bmr ? Math.round(bmr) : null, protein, carbs, fat, hasTdee: !!tdee, clampedToBMR };
+}
+
+function calcMetrics() {
+  const age=+document.getElementById('f-age').value,
+        h  =+document.getElementById('f-height').value,
+        w  =+document.getElementById('f-weight').value,
+        g  = document.getElementById('f-gender').value,
+        act=+document.getElementById('f-activity').value;
+  const panel = document.getElementById('metrics-results');
+  if (!age||!h||!w||!g) { panel.style.display='none'; return; }
+  panel.style.display='block';
+  const bmi=calcBMI(w,h), bmr=calcBMR(w,h,age,g), cat=bmiCat(bmi);
+  document.getElementById('r-bmi').textContent=bmi.toFixed(1);
+  document.getElementById('r-bmi').style.color=cat.color;
+  document.getElementById('r-bmi-cat').textContent=cat.label;
+  document.getElementById('r-bmi-cat').style.color=cat.color;
+  if (bmr) { document.getElementById('r-bmr').textContent=Math.round(bmr); document.getElementById('r-tdee').textContent=Math.round(bmr*act); }
+  document.getElementById('bmi-pointer').style.left=bmiPos(bmi);
+  document.getElementById('r-ideal').textContent=`${(18.5*Math.pow(h/100,2)).toFixed(1)} – ${(24.9*Math.pow(h/100,2)).toFixed(1)} kg`;
+}
+
+// ══ RENDER ══
+function renderAll() { renderStats(); renderTable(); }
+
+function renderStats() {
+  const now=new Date(), m=now.getMonth(), y=now.getFullYear();
+  document.getElementById('stat-total').textContent  = clients.length;
+  document.getElementById('stat-active').textContent = clients.filter(c=>c.status==='active').length;
+  document.getElementById('stat-new').textContent    = clients.filter(c=>{ const d=new Date(c.created_at); return d.getMonth()===m&&d.getFullYear()===y; }).length;
+  document.getElementById('stat-data').textContent   = clients.filter(c=>c.weight&&c.height).length;
+  renderStatsSection();
+}
+
+function renderStatsSection() {
+  // Use currently filtered list for stats
+  const q     = document.getElementById('search').value.toLowerCase();
+  const fSt   = document.getElementById('f-filter-status').value;
+  const fGend = document.getElementById('f-filter-gender').value;
+  const fGoal = document.getElementById('f-filter-goal').value;
+  const fSvc  = document.getElementById('f-filter-service').value;
+  const list  = clients.filter(c => {
+    if (!`${c.name} ${c.surname} ${c.email||''}`.toLowerCase().includes(q)) return false;
+    if (fSt   && c.status !== fSt)   return false;
+    if (fGend && c.gender !== fGend) return false;
+    if (fGoal && c.goal   !== fGoal) return false;
+    if (fSvc  && c.service !== fSvc) return false;
+    return true;
+  });
+
+  const goalLabelsShort = { loss:'Hubnutí', gain:'Nabírání', maintain:'Udržení', health:'Zdravé str.', sport_male:'Sportovec M', sport_female:'Sportovkyně Ž', other:'Jiné' };
+  const statusLabels = { new:'Nový', active:'Aktivní', done:'Ukončen' };
+  const statusColors = { new:'#F2D8C9', active:'#D1FAE5', done:'#F3F4F6' };
+  const serviceColors = ['#C8D5D0','#D1FAE5','#FEF3C7','#EEF2FF','#FCE7F3'];
+
+  function renderBars(el, data, colorMap) {
+    const max = Math.max(...Object.values(data), 1);
+    el.innerHTML = Object.entries(data)
+      .sort((a,b) => b[1]-a[1])
+      .map(([k,v], i) => `
+        <div class="stat-bar-row">
+          <div class="stat-bar-label" title="${k}">${k}</div>
+          <div class="stat-bar-track">
+            <div class="stat-bar-fill" style="width:${Math.round(v/max*100)}%;background:${colorMap?colorMap[k]||'var(--sage)':'var(--sage)'}"></div>
+          </div>
+          <div class="stat-bar-count">${v}</div>
+        </div>`).join('');
+    if (!Object.keys(data).length) el.innerHTML = '<div style="font-size:13px;color:rgba(28,28,30,0.35)">Žádná data</div>';
+  }
+
+  // By service
+  const bySvc = {};
+  list.forEach(c => { const k = c.service||'Neuvedeno'; bySvc[k] = (bySvc[k]||0)+1; });
+  renderBars(document.getElementById('stats-by-service'), bySvc, null);
+
+  // By goal
+  const byGoal = {};
+  list.forEach(c => { if(c.goal) { const k=goalLabelsShort[c.goal]||c.goal; byGoal[k]=(byGoal[k]||0)+1; } });
+  renderBars(document.getElementById('stats-by-goal'), byGoal, null);
+
+  // By status
+  const byStatus = {};
+  list.forEach(c => { const k=statusLabels[c.status]||c.status||'Neuvedeno'; byStatus[k]=(byStatus[k]||0)+1; });
+  renderBars(document.getElementById('stats-by-status'), byStatus, statusColors);
+}
+
+function toggleStats() {
+  const body = document.getElementById('stats-body');
+  const icon = document.getElementById('stats-toggle-icon');
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  icon.style.transform = open ? 'rotate(180deg)' : '';
+  if (!open) renderStatsSection();
+}
+
+function setFilter(f,btn) {
+  filterState=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+const goalLabels = {
+  loss:'Hubnutí', gain:'Nabírání', maintain:'Udržení váhy',
+  health:'Zdravé stravování', sport_male:'Sportovec — muž',
+  sport_female:'Sportovkyně — žena', other:'Jiné'
+};
+const goalColors = {
+  loss:'#FEF3C7', gain:'#D1FAE5', maintain:'#F0F4F8',
+  health:'#FCE7F3', sport_male:'#DBEAFE', sport_female:'#EDE9FE', other:'#F3F4F6'
+};
+
+function renderTable() {
+  const q      = document.getElementById('search').value.toLowerCase();
+  const fSt    = document.getElementById('f-filter-status').value;
+  const fGend  = document.getElementById('f-filter-gender').value;
+  const fGoal  = document.getElementById('f-filter-goal').value;
+  const fSvc   = document.getElementById('f-filter-service').value;
+
+  const list = clients.filter(c => {
+    if (!`${c.name} ${c.surname} ${c.email||''}`.toLowerCase().includes(q)) return false;
+    if (fSt   && c.status !== fSt)   return false;
+    if (fGend && c.gender !== fGend) return false;
+    if (fGoal && c.goal   !== fGoal) return false;
+    if (fSvc  && c.service !== fSvc) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('client-tbody');
+  const empty = document.getElementById('empty-state');
+  renderStatsSection();
+  if (!list.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  const sm = { active:['Aktivní','badge-active'], new:['Nový','badge-new'], done:['Ukončen','badge-done'] };
+
+  tbody.innerHTML = list.map(c => {
+    // BMI
+    let bH = '<span style="color:rgba(28,28,30,0.3)">—</span>';
+    let rH = bH, tH = bH;
+    if (c.weight && c.height) {
+      const bmi = calcBMI(+c.weight, +c.height), cat = bmiCat(bmi);
+      bH = `<span class="bmi-chip"><span class="bmi-dot" style="background:${cat.color}"></span>${bmi.toFixed(1)} <span style="font-weight:400;color:rgba(28,28,30,0.5)">${cat.label}</span></span>`;
+      if (c.age && c.gender) {
+        const bmr = calcBMR(+c.weight, +c.height, +c.age, c.gender);
+        if (bmr) {
+          rH = `<b>${Math.round(bmr)}</b> <span style="color:rgba(28,28,30,0.4);font-size:12px">kcal</span>`;
+          tH = `<b>${Math.round(bmr * +(c.activity||1.55))}</b> <span style="color:rgba(28,28,30,0.4);font-size:12px">kcal</span>`;
+        }
+      }
+    }
+
+    // Goal + Service cell
+    let goalH = '<span style="color:rgba(28,28,30,0.3)">—</span>';
+    if (c.goal || c.service) {
+      const glabel = goalLabels[c.goal] || '';
+      const gcol   = goalColors[c.goal]  || '#F3F4F6';
+      goalH = `<div style="display:flex;flex-direction:column;gap:4px">
+        ${glabel ? `<span style="background:${gcol};border-radius:50px;padding:2px 10px;font-size:11px;font-weight:700;color:var(--terra);display:inline-block;width:fit-content">${glabel}</span>` : ''}
+        ${c.service ? `<span style="font-size:12px;color:rgba(28,28,30,0.5)">${c.service}</span>` : ''}
+      </div>`;
+    }
+
+    // Recommended intake — TDEE-adjusted
+    let macroH = '<span style="color:rgba(28,28,30,0.3)">—</span>';
+    const macros = calcClientMacros(c);
+    if (macros) {
+      const offsetColor = macros.clampedToBMR ? '#92400E'
+                        : MACRO_PLANS[c.goal].kcalOffset < 0 ? '#27AE60'
+                        : MACRO_PLANS[c.goal].kcalOffset > 0 ? '#E67E22' : 'rgba(28,28,30,0.5)';
+      const clampIcon = macros.clampedToBMR ? ' ⚠️' : '';
+      macroH = `<div style="font-size:12px;line-height:1.8">
+        <span style="font-weight:700;color:var(--terra);font-size:14px">~${macros.targetKcal} kcal${clampIcon}</span>
+        ${macros.hasTdee ? `<span style="color:${offsetColor};font-size:11px;margin-left:4px">${macros.clampedToBMR ? '(min. BMR)' : (MACRO_PLANS[c.goal].kcalOffset > 0 ? '+' : '') + MACRO_PLANS[c.goal].kcalOffset}</span>` : ''}
+        <br>
+        <span style="color:rgba(28,28,30,0.5)">B:${macros.protein}g &nbsp;S:${macros.carbs}g &nbsp;T:${macros.fat}g</span>
+      </div>`;
+    }
+
+    const [sl, sc] = sm[c.status] || ['—','badge-done'];
+    const d = new Date(c.created_at).toLocaleDateString('cs-CZ', {day:'numeric',month:'short',year:'numeric'});
+
+    return `<tr onclick="openDetail('${c.id}')">
+      <td><div class="client-name">${c.name} ${c.surname}</div><div class="client-email">${c.email||'—'}</div></td>
+      <td class="col-div"><span class="badge ${sc}">${sl}</span></td>
+      <td class="col-div">${goalH}</td>
+      <td class="col-div">${bH}</td>
+      <td class="col-div">${macroH}</td>
+      <td class="col-div">${rH}</td>
+      <td class="col-div">${tH}</td>
+      <td class="col-div" style="color:rgba(28,28,30,0.5);font-size:13px">${d}</td>
+      <td onclick="event.stopPropagation()">
+        <div class="action-btns">
+          <button class="btn-sm" onclick="openEditModal('${c.id}')">Upravit</button>
+          <button class="btn-sm danger" onclick="deleteClient('${c.id}')">Smazat</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ══ MODAL HELPERS ══
+const getF = id => document.getElementById(id);
+function openAddModal(){ editingId=null; getF('modal-title').textContent='Nový klient'; clearForm(); openModal('add-modal'); }
+function openEditModal(id){
+  editingId=id;
+  const c=clients.find(x=>x.id===id); if(!c) return;
+  getF('modal-title').textContent='Upravit klienta';
+  ['name','surname','email','phone','age','height','weight','gender','activity','notes','status','allergies','service','goal','diseases']
+    .forEach(k=>{ const el=getF('f-'+k); if(el) el.value=c[k]||''; });
+  calcMetrics(); openModal('add-modal');
+}
+function clearForm(){
+  ['name','surname','email','phone','age','height','weight','notes','allergies','diseases']
+    .forEach(k=>{ const el=getF('f-'+k); if(el) el.value=''; });
+  getF('f-status').value='new'; getF('f-gender').value=''; getF('f-activity').value='1.55';
+  getF('f-goal').value=''; getF('f-service').value='';
+  getF('metrics-results').style.display='none';
+}
+
+async function saveClient(){
+  const name=getF('f-name').value.trim();
+  if(!name){ showToast('Zadejte alespoň jméno klienta'); return; }
+  const data={
+    name, surname:getF('f-surname').value.trim(), email:getF('f-email').value.trim(),
+    phone:getF('f-phone').value.trim(), status:getF('f-status').value,
+    age:getF('f-age').value||null, height:getF('f-height').value||null,
+    weight:getF('f-weight').value||null, gender:getF('f-gender').value||null,
+    activity:getF('f-activity').value, notes:getF('f-notes').value.trim(),
+    allergies:getF('f-allergies').value.trim(),
+    diseases:getF('f-diseases').value.trim(),
+    service:getF('f-service').value,
+    goal:getF('f-goal').value
+  };
+  setSaving(true);
+  try {
+    if(editingId){ await dbUpdate(editingId,data); showToast('✓ Klient aktualizován'); }
+    else { const row=await dbInsert(data); if(!clients.find(c=>c.id===row.id)) clients.unshift(row); showToast('✓ Klient přidán'); }
+    renderAll(); closeModal('add-modal');
+  } catch(e){ showToast('⚠️ Chyba: '+e.message); }
+  finally { setSaving(false); }
+}
+
+async function deleteClient(id){
+  if(!confirm('Opravdu smazat tohoto klienta?')) return;
+  try { await dbDelete(id); renderAll(); showToast('Klient smazán'); }
+  catch(e){ showToast('⚠️ Chyba: '+e.message); }
+}
+
+function setSaving(on){
+  const btn=getF('save-btn'), txt=getF('save-txt');
+  btn.disabled=on;
+  txt.innerHTML=on?'<span class="spinner" style="width:16px;height:16px;border-width:2px;margin:0"></span>':'Uložit klienta';
+}
+
+// ══ DETAIL ══
+function openDetail(id){
+  detailId=id;
+  const c=clients.find(x=>x.id===id); if(!c) return;
+  getF('d-name').textContent=`${c.name} ${c.surname}`;
+  getF('d-meta').textContent=[c.email,c.phone].filter(Boolean).join(' · ')||'Bez kontaktních údajů';
+  const sm={active:'Aktivní',new:'Nový',done:'Ukončen'},gm={M:'Muž',F:'Žena'},
+        am={'1.2':'Sedavý','1.375':'Lehká aktivita','1.55':'Střední','1.725':'Vysoká','1.9':'Extrémní'},
+        goalMap={loss:'Hubnutí',gain:'Nabírání svalové hmoty',maintain:'Udržení váhy',health:'Zdravé stravování',sport_male:'Sportovec — muž',sport_female:'Sportovkyně — žena',other:'Jiné'};
+  getF('d-info-rows').innerHTML=[
+    ['Služba', c.service||'—'],
+    ['Cíl', goalMap[c.goal]||'—'],
+    ['E-mail',c.email||'—'],['Telefon',c.phone||'—'],['Stav',sm[c.status]||'—'],
+    ['Věk',c.age?c.age+' let':'—'],['Výška',c.height?c.height+' cm':'—'],
+    ['Váha',c.weight?c.weight+' kg':'—'],['Pohlaví',gm[c.gender]||'—'],
+    ['Aktivita',am[c.activity]||'—'],
+    ['Nemoci & omezení', c.diseases||'—'],
+    ['Alergie', c.allergies||'—'],
+    ['Přidán',new Date(c.created_at).toLocaleDateString('cs-CZ',{day:'numeric',month:'long',year:'numeric'})]
+  ].map(([l,v])=>`<div class="info-row"><span class="info-row-label">${l}</span><span class="info-row-val">${v}</span></div>`).join('');
+
+  let mH='<p style="color:rgba(28,28,30,0.4);font-size:14px">Nejsou zadány tělesné hodnoty.</p>';
+  if(c.weight&&c.height&&c.age&&c.gender){
+    const bmi=calcBMI(+c.weight,+c.height),bmr=calcBMR(+c.weight,+c.height,+c.age,c.gender),
+          tdee=bmr?Math.round(bmr*+(c.activity||1.55)):null,cat=bmiCat(bmi),
+          h=+c.height,iMin=(18.5*Math.pow(h/100,2)).toFixed(1),iMax=(24.9*Math.pow(h/100,2)).toFixed(1);
+
+    const macros = calcClientMacros(c);
+    const recKcal = macros ? macros.targetKcal : (tdee||null);
+    const savedKcal = c.custom_kcal || '';
+
+    // Micronutrients based on gender, age, activity
+    const isMale = c.gender === 'M';
+    const isSport = (c.goal === 'sport_male' || c.goal === 'sport_female');
+    const w = +c.weight;
+    const age = +c.age;
+
+    // DDD dle vyhlášky ČR / EFSA + zápisky z kurzu
+    const micros = [
+      // VITAMÍNY
+      { group: '💊 Vitamíny', name: 'Vitamín D', val: isSport ? '25 µg' : '20 µg', note: 'Kritický v ČR — deficit u 80 % populace; tučné ryby, sluneční záření', warn: true },
+      { group: '💊 Vitamíny', name: 'Vitamín C', val: isMale ? '110 mg' : '95 mg', note: 'Antioxidant, imunita; paprika, brokolice, citrusy; sportovci +35 %', warn: isSport },
+      { group: '💊 Vitamíny', name: 'Vitamín E', val: isMale ? '14 mg' : '12 mg', note: 'Antioxidant, ochrana tukových buněk; ořechy, slunečnicový olej', warn: false },
+      { group: '💊 Vitamíny', name: 'Vitamín A', val: isMale ? '1 mg' : '0,8 mg', note: 'Zrak, imunita; játra, mrkev, vejce (retinol i beta-karoten)', warn: false },
+      { group: '💊 Vitamíny', name: 'Vitamín K', val: isMale ? '70 µg' : '60 µg', note: 'Srážlivost krve, metabolismus Ca; listová zelenina, brokolice', warn: false },
+      { group: '💊 Vitamíny', name: 'B1 (Thiamin)', val: isMale ? '1,2 mg' : '1,0 mg', note: 'Energetický metabolismus; celozrnné, luštěniny, vepřové', warn: false },
+      { group: '💊 Vitamíny', name: 'B2 (Riboflavin)', val: isMale ? '1,4 mg' : '1,1 mg', note: 'Metabolismus energie; mléčné výrobky, játra, vejce', warn: false },
+      { group: '💊 Vitamíny', name: 'B3 (Niacin)', val: isMale ? '15 mg' : '12 mg', note: 'NAD+ kofaktor; maso, ryby, obiloviny', warn: false },
+      { group: '💊 Vitamíny', name: 'B6 (Pyridoxin)', val: isMale ? '1,5 mg' : '1,2 mg', note: 'Aminokyselinový metabolismus, DAO (histamin); maso, banány', warn: false },
+      { group: '💊 Vitamíny', name: 'B9 (Kyselina listová)', val: '300 µg', note: 'Syntéza DNA; listová zelenina, luštěniny; ženy ve fertilním věku ↑', warn: false },
+      { group: '💊 Vitamíny', name: 'B12 (Kobalamin)', val: '3 µg', note: 'Nervy, krvinky; pouze živočišné zdroje — vegani nutně suplementovat!', warn: false },
+      // MINERÁLY
+      { group: '⚗️ Minerály a stopové prvky', name: 'Vápník (Ca)', val: '1 000 mg', note: 'Kosti, svaly; mléčné výrobky, sardinky, sezam, mák; poměr Ca:Mg = 2–2,5:1', warn: false },
+      { group: '⚗️ Minerály a stopové prvky', name: 'Hořčík (Mg)', val: isMale ? '350 mg' : '300 mg', note: 'Enzymy, svaly, nervy; chia, mák, kešu, ovesné vločky; u sportovců ↑', warn: isSport },
+      { group: '⚗️ Minerály a stopové prvky', name: 'Železo (Fe)', val: isMale ? '10 mg' : '15 mg', note: 'Hemoglobin, imunita; ženy výrazně vyšší potřeba (menstruace ≈1,5–2 mg ztráty)', warn: !isMale },
+      { group: '⚗️ Minerály a stopové prvky', name: 'Zinek (Zn)', val: isMale ? '10 mg' : '7 mg', note: 'Imunita, hojení, DAO; ústřice, hovězí, dýňová semínka; nebrat s kávou/mlékem', warn: false },
+      { group: '⚗️ Minerály a stopové prvky', name: 'Selen (Se)', val: isMale ? '70 µg' : '60 µg', note: 'Antioxidant, štítná žláza; para ořechy (1–2 kusy = DDD!), ryby', warn: false },
+      { group: '⚗️ Minerály a stopové prvky', name: 'Jód', val: '200 µg', note: 'Štítná žláza (T3, T4); jodizovaná sůl, mořské plody, mořské řasy', warn: false },
+      { group: '⚗️ Minerály a stopové prvky', name: 'Draslík (K)', val: '4 000 mg', note: 'TK, svalová funkce; banány, brambory, houby, sušené ovoce; poměr Na:K hlídat', warn: false },
+      { group: '⚗️ Minerály a stopové prvky', name: 'Fosfor (P)', val: '700 mg', note: 'Mineralizace kostí s Ca; maso, ryby, mléčné výrobky, luštěniny', warn: false },
+      // OMEGA a vláknina
+      { group: '🧪 Ostatní důležité', name: 'Omega-3 (EPA+DHA)', val: '250–500 mg', note: 'Protizánětlivé; tučné ryby 2× týdně nebo doplněk; poměr ω3:ω6 = 1:3–5', warn: true },
+      { group: '🧪 Ostatní důležité', name: 'Vláknina', val: isSport ? '30–35 g' : '25–35 g', note: `${Math.round(30 * w / 70)} g dle hmotnosti (≈30 g/2000 kcal); zelenina, luštěniny, celozrnné`, warn: false },
+      { group: '🧪 Ostatní důležité', name: 'Prebiotika', val: isMale ? `${(0.3*w).toFixed(0)} g` : `${(0.4*w).toFixed(0)} g`, note: 'Inulin, FOS, GOS; čekanka, česnek, banán, luštěniny; podpora mikrobiomu', warn: false },
+      { group: '🧪 Ostatní důležité', name: 'Voda / tekutiny', val: `${Math.round(w * 0.035)} l`, note: `≈35 ml/kg váhy = ${Math.round(w*0.035*1000)} ml; sportovci +0,5–1,5 l dle aktivity`, warn: false },
+    ];
+
+    // Group micros
+    const groups = [...new Set(micros.map(m => m.group))];
+
+    const microTables = groups.map(g => {
+      const items = micros.filter(m => m.group === g);
+      return `<div style="margin-bottom:20px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(28,28,30,0.4);margin-bottom:8px">${g}</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead><tr style="background:var(--cream)">
+            <th style="padding:6px 10px;text-align:left;font-weight:700;color:rgba(28,28,30,0.5);font-size:11px;border-bottom:1px solid var(--border)">Mikroživina</th>
+            <th style="padding:6px 10px;text-align:center;font-weight:700;color:rgba(28,28,30,0.5);font-size:11px;border-bottom:1px solid var(--border)">DDD</th>
+            <th style="padding:6px 10px;text-align:left;font-weight:700;color:rgba(28,28,30,0.5);font-size:11px;border-bottom:1px solid var(--border)">Poznámka</th>
+          </tr></thead>
+          <tbody>
+            ${items.map((m,i) => `<tr style="background:${i%2===0?'var(--white)':'var(--cream)'}">
+              <td style="padding:7px 10px;font-weight:700;color:var(--terra)">
+                ${m.warn ? '<span style="color:#E67E22;margin-right:4px">⚠</span>' : ''}${m.name}
+              </td>
+              <td style="padding:7px 10px;text-align:center;font-weight:700;color:var(--sage-d)">${m.val}</td>
+              <td style="padding:7px 10px;color:rgba(28,28,30,0.55);font-size:12px">${m.note}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    }).join('');
+
+    mH=`<div class="results-grid">
+      <div class="result-card bmi-card"><div class="result-val" style="color:${cat.color}">${bmi.toFixed(1)}</div><div class="result-label">BMI</div><div class="result-note" style="color:${cat.color}">${cat.label}</div></div>
+      <div class="result-card bmr-card"><div class="result-val">${bmr?Math.round(bmr):'—'}</div><div class="result-label">BMR (kcal/den)</div><div class="result-note">Nikdy nejít pod BMR</div></div>
+      <div class="result-card tdee-card"><div class="result-val">${tdee||'—'}</div><div class="result-label">TDEE (kcal/den)</div><div class="result-note">Celková potřeba</div></div>
+    </div>
+    <div class="bmi-bar-wrap" style="margin-top:20px">
+      <div class="bmi-bar-label">BMI škála</div>
+      <div class="bmi-bar-track"><div class="bmi-bar-pointer" style="left:${bmiPos(bmi)}"></div></div>
+      <div class="bmi-bar-labels"><span>Podváha &lt;18.5</span><span>Norma 18.5–25</span><span>Nadváha 25–30</span><span>Obezita &gt;30</span></div>
+    </div>
+    <div style="margin-top:12px;font-size:13px;color:rgba(28,28,30,0.5);margin-bottom:24px">Ideální váha: <strong>${iMin} – ${iMax} kg</strong></div>
+
+    <!-- Editovatelný kalorický příjem -->
+    <div style="background:var(--cream);border-radius:var(--r);padding:20px;margin-bottom:24px;border:1.5px solid var(--border)">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(28,28,30,0.4);margin-bottom:12px">⚡ Kalorický příjem klienta</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:center">
+        <div style="text-align:center">
+          <div style="font-size:11px;color:rgba(28,28,30,0.4);margin-bottom:4px">Vypočtený doporučený</div>
+          <div style="font-size:22px;font-weight:700;color:var(--sage-d)">${recKcal ? recKcal + ' kcal' : '—'}</div>
+          <div style="font-size:11px;color:rgba(28,28,30,0.35);margin-top:2px">z TDEE ${tdee||'?'} kcal</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:rgba(28,28,30,0.4);margin-bottom:6px">Vlastní příjem (Kč/přepis)</div>
+          <div style="display:flex;gap:6px;justify-content:center">
+            <input type="number" id="custom-kcal-input" value="${savedKcal}" placeholder="${recKcal||''}"
+              style="width:110px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:15px;font-weight:700;color:var(--terra);text-align:center;outline:none;background:var(--white)"
+              oninput="document.getElementById('custom-kcal-preview').textContent=this.value?(this.value+' kcal'):'—'"
+            >
+            <button onclick="saveCustomKcal()" style="background:var(--sage);color:var(--white);border:none;border-radius:8px;padding:8px 14px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer">Uložit</button>
+          </div>
+          <button onclick="document.getElementById('custom-kcal-input').value='';saveCustomKcal();document.getElementById('custom-kcal-preview').textContent='—'" style="background:none;border:none;font-size:11px;color:rgba(28,28,30,0.35);cursor:pointer;margin-top:4px">Použít vypočtený</button>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:rgba(28,28,30,0.4);margin-bottom:4px">Aktivní příjem klienta</div>
+          <div id="custom-kcal-preview" style="font-size:22px;font-weight:700;color:var(--terra)">${savedKcal ? savedKcal+' kcal' : (recKcal ? recKcal+' kcal' : '—')}</div>
+          <div style="font-size:11px;color:rgba(28,28,30,0.35);margin-top:2px">${savedKcal ? 'vlastní nastavení' : 'dle výpočtu'}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mikroživiny -->
+    <div style="font-size:15px;font-weight:700;color:var(--terra);margin-bottom:12px">📊 Doporučený příjem mikroživin a vitamínů</div>
+    <div style="font-size:12px;color:rgba(28,28,30,0.4);margin-bottom:16px;line-height:1.5">
+      Hodnoty dle vyhlášky ČR č. 450/2004 Sb. / EFSA a zápisků z kurzu výživy. Přizpůsobeno: pohlaví (${isMale?'muž':'žena'}), věk (${age} let), aktivita${isSport?' — sportovní cíl ↑':''}.
+      ⚠ = zvýšená pozornost pro tohoto klienta.
+    </div>
+    ${microTables}
+    <div style="font-size:11px;color:rgba(28,28,30,0.3);margin-top:8px">Zdroj: Vyhláška ČR č. 450/2004 Sb., EFSA, zápisky z kurzu výživa a suplementace (PVS ATAC). Hodnoty jsou orientační.</div>`;
+  }
+  getF('d-metrics-content').innerHTML=mH;
+  getF('d-notes-area').value=c.notes||'';
+  getF('notes-status').textContent='Automaticky ukládáno';
+  document.querySelectorAll('.detail-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.detail-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.detail-tab').classList.add('active');
+  getF('tab-overview').classList.add('active');
+  openModal('detail-modal');
+}
+
+function editCurrent(){ closeModal('detail-modal'); openEditModal(detailId); }
+
+function scheduleNotesSave(){
+  clearTimeout(notesTimer);
+  getF('notes-status').textContent='Ukládání…';
+  notesTimer=setTimeout(async()=>{
+    if(!detailId) return;
+    try{ await dbUpdate(detailId,{notes:getF('d-notes-area').value}); getF('notes-status').textContent='✓ Uloženo'; }
+    catch{ getF('notes-status').textContent='⚠️ Chyba'; }
+  },800);
+}
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+document.querySelectorAll('.modal-backdrop').forEach(b=>
+  b.addEventListener('click',e=>{ if(e.target===b) b.classList.remove('open'); })
+);
+
+// Přepínání záložek
+function switchTab(name, btn) {
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.detail-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'docs')      loadDocuments(detailId);
+  if (name === 'progress')  loadWeightHistory(detailId);
+  if (name === 'macros')    renderMacros(detailId);
+  if (name === 'diary')     loadDiary(detailId);
+  if (name === 'nutrition') renderNutritionPlan(detailId);
+  if (name === 'ai')        initAiAdvisor(detailId);
+}
+
+// ══ WEIGHT HISTORY ══
+let weightHistory = [], weightChart = null, fatChart = null, muscleChart = null;
+
+function openWeightModal() {
+  const c = clients.find(x => x.id === detailId);
+  document.getElementById('weight-modal-sub').textContent = c ? `${c.name} ${c.surname}` : '—';
+  getF('w-weight').value = '';
+  getF('w-fat').value = '';
+  getF('w-muscle').value = '';
+  getF('w-note').value = '';
+  getF('w-date').value = new Date().toISOString().split('T')[0];
+  openModal('weight-modal');
+}
+
+async function loadWeightHistory(clientId) {
+  getF('weight-loading').style.display = 'block';
+  getF('weight-empty').style.display = 'none';
+  getF('weight-table-wrap').style.display = 'none';
+
+  if (useSupabase) {
+    const { data, error } = await sb.from('weight_history')
+      .select('*').eq('client_id', clientId)
+      .order('date', { ascending: true });
+    weightHistory = error ? [] : (data || []);
+  } else {
+    weightHistory = JSON.parse(localStorage.getItem('vv_weight_' + clientId) || '[]');
+  }
+
+  getF('weight-loading').style.display = 'none';
+  renderWeightHistory(clientId);
+}
+
+function makeChart(canvasId, label, data, labels, color) {
+  const canvas = getF(canvasId);
+  const existing = Chart.getChart(canvas);
+  if (existing) existing.destroy();
+  const hasData = data.some(v => v !== null && v !== undefined);
+  if (!hasData) { canvas.style.opacity = '0.3'; return; }
+  canvas.style.opacity = '1';
+  const vals = data.filter(v => v !== null && v !== undefined).map(Number);
+  const minV = Math.min(...vals), maxV = Math.max(...vals);
+  const pad = Math.max((maxV - minV) * 0.15, 0.5);
+  return new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{ label, data, borderColor: color, backgroundColor: color+'15',
+        borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: color,
+        fill: true, tension: 0.35, spanGaps: true }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: minV - pad, max: maxV + pad,
+             ticks: { callback: v => v + (canvasId==='fat-chart' ? ' %' : ' kg') },
+             grid: { color: 'rgba(28,28,30,0.06)' } },
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+function renderWeightHistory(clientId) {
+  if (!weightHistory.length) { getF('weight-empty').style.display = 'block'; return; }
+  getF('weight-table-wrap').style.display = 'block';
+
+  const labels  = weightHistory.map(w => new Date(w.date).toLocaleDateString('cs-CZ', {day:'numeric',month:'short'}));
+  const weights  = weightHistory.map(w => w.weight ? +w.weight : null);
+  const fats     = weightHistory.map(w => w.body_fat  ? +w.body_fat  : null);
+  const muscles  = weightHistory.map(w => w.muscle_mass ? +w.muscle_mass : null);
+
+  makeChart('weight-chart', 'Hmotnost (kg)', weights, labels, '#4A5E3A');
+  makeChart('fat-chart',    'Tělesný tuk (%)', fats, labels, '#E67E22');
+  makeChart('muscle-chart', 'Svalová hmota (kg)', muscles, labels, '#1E4D30');
+
+  // Table newest first
+  const sorted = [...weightHistory].reverse();
+  const fmtDiff = (cur, prev, field, unit) => {
+    if (!prev || prev[field] == null || cur[field] == null) return '—';
+    const diff = (+cur[field] - +prev[field]).toFixed(1);
+    if (diff > 0) return `<span class="change-down">+${diff}${unit}</span>`;
+    if (diff < 0) return `<span class="change-up">${diff}${unit}</span>`;
+    return '<span>0</span>';
+  };
+  getF('weight-tbody').innerHTML = sorted.map((w, i) => {
+    const prev = sorted[i + 1];
+    return `<tr>
+      <td>${new Date(w.date).toLocaleDateString('cs-CZ')}</td>
+      <td><strong>${w.weight ? w.weight+' kg' : '—'}</strong></td>
+      <td>${fmtDiff(w, prev, 'weight', ' kg')}</td>
+      <td>${w.body_fat != null ? w.body_fat+' %' : '—'}</td>
+      <td>${fmtDiff(w, prev, 'body_fat', ' %')}</td>
+      <td>${w.muscle_mass != null ? w.muscle_mass+' kg' : '—'}</td>
+      <td>${fmtDiff(w, prev, 'muscle_mass', ' kg')}</td>
+      <td style="color:rgba(28,28,30,0.5);font-size:13px">${w.note||'—'}</td>
+      <td><button class="btn-sm danger" onclick="deleteWeight('${w.id}','${clientId}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function saveWeight() {
+  const weight = getF('w-weight').value ? parseFloat(getF('w-weight').value) : null;
+  const body_fat = getF('w-fat').value ? parseFloat(getF('w-fat').value) : null;
+  const muscle_mass = getF('w-muscle').value ? parseFloat(getF('w-muscle').value) : null;
+  const date = getF('w-date').value;
+
+  if (!date || (weight == null && body_fat == null && muscle_mass == null)) {
+    showToast('Zadejte datum a alespoň jednu hodnotu'); return;
+  }
+
+  const data = { client_id: detailId, date,
+    weight:      weight,
+    body_fat:    body_fat,
+    muscle_mass: muscle_mass,
+    note: getF('w-note').value.trim() };
+  const btn = getF('weight-save-btn'), txt = getF('weight-save-txt');
+  btn.disabled = true; txt.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;margin:0"></span>';
+
+  try {
+    if (useSupabase) {
+      const { data: row, error } = await sb.from('weight_history').insert([data]).select().single();
+      if (error) throw error;
+      weightHistory.push(row);
+      weightHistory.sort((a,b) => a.date.localeCompare(b.date));
+    } else {
+      const row = { ...data, id:'lw_'+Date.now(), created_at:new Date().toISOString() };
+      weightHistory.push(row);
+      localStorage.setItem('vv_weight_'+detailId, JSON.stringify(weightHistory));
+    }
+    if (weight) {
+      await dbUpdate(detailId, { weight });
+      const ci = clients.findIndex(c => c.id === detailId);
+      if (ci !== -1) clients[ci].weight = weight;
+    }
+    showToast('✓ Měření zapsáno');
+    closeModal('weight-modal');
+    renderWeightHistory(detailId);
+  } catch(e) { showToast('⚠️ Chyba: ' + e.message); }
+  finally { btn.disabled = false; txt.textContent = 'Uložit'; }
+}
+
+async function deleteWeight(id, clientId) {
+  if (!confirm('Smazat tento záznam?')) return;
+  try {
+    if (useSupabase) { const {error}=await sb.from('weight_history').delete().eq('id',id); if(error) throw error; }
+    weightHistory = weightHistory.filter(w => w.id !== id);
+    if (!useSupabase) localStorage.setItem('vv_weight_'+clientId, JSON.stringify(weightHistory));
+    renderWeightHistory(clientId);
+    showToast('Záznam smazán');
+  } catch(e) { showToast('⚠️ Chyba: '+e.message); }
+}
+
+// ══ MACROS ══
+const MACRO_PLANS = {
+  loss: {
+    name: 'Hubnutí',
+    color: '#3A4D2C',
+    kcalOffset: -450,          // TDEE − 450 kcal deficit
+    offsetLabel: '−450 kcal pod TDEE',
+    note: 'Nízká sacharidová koncepce (30–40 % energie ze sacharidů). Vyšší příjem bílkovin chrání svalovou hmotu při kalorickém deficitu. Preferujte komplexní sacharidy a zdravé tuky.',
+    protein: { mult: 1.8, label: '× kg váhy', note: 'Ochrana svalové hmoty při deficitu (základ 1 g/kg + přídavek)' },
+    carbs:   { mult: 2.5, label: '× kg váhy', note: 'Nízkosacharidová koncepce (2–3 g/kg) — komplexní zdroje' },
+    fat:     { mult: 0.8, label: '× kg váhy', note: '20–25 % energetického příjmu, přednost nenasyceným tukům' },
+    carbRatio: 0.55,           // z zbývajících kcal po proteinu: 55 % sach, 45 % tuky
+  },
+  gain: {
+    name: 'Nabírání svalové hmoty',
+    color: '#1E4D30',
+    kcalOffset: +350,          // TDEE + 350 kcal přebytek
+    offsetLabel: '+350 kcal nad TDEE',
+    note: 'Vysokosacharidová koncepce (50–60 % energie ze sacharidů). Silový trénink je podmínkou. Bílkoviny odpovídají doporučení pro silové sportovce (1,4–1,7 g/kg + 0,2–0,3 g).',
+    protein: { mult: 2.0, label: '× kg váhy', note: 'Silový sport: 1,4–1,7 g/kg + přídavek 0,2–0,3 g (dle dokumentu)' },
+    carbs:   { mult: 5.0, label: '× kg váhy', note: 'Vysokosacharidová: 4–6 g/kg — gainery, komplexní sacharidy' },
+    fat:     { mult: 1.0, label: '× kg váhy', note: '20–30 % energetického příjmu, nenasycené tuky v prioritě' },
+    carbRatio: 0.65,
+  },
+  maintain: {
+    name: 'Udržení váhy',
+    color: '#4A5E3A',
+    kcalOffset: 0,             // = TDEE
+    offsetLabel: '= TDEE',
+    note: 'Smíšená koncepce — kombinace vysokosacharidové a nízkosacharidové stravy. Příjem kalorií odpovídá výdeji (TDEE). Zaměřte se na stabilní složení těla a pestrost potravin.',
+    protein: { mult: 1.5, label: '× kg váhy', note: 'Středový příjem — základ 1 g/kg + rezerva pro udržení svalů' },
+    carbs:   { mult: 3.5, label: '× kg váhy', note: 'Střední příjem sacharidů (3–4 g/kg), dle aktivity' },
+    fat:     { mult: 0.9, label: '× kg váhy', note: '20–30 % energetického příjmu, poměr ω3:ω6 = 1:3–5' },
+    carbRatio: 0.60,
+  },
+  health: {
+    name: 'Zdravé stravování',
+    color: '#9B7653',
+    kcalOffset: 0,
+    offsetLabel: '= TDEE',
+    note: 'Zaměření na kvalitu potravin a dlouhodobou udržitelnost. Pestrost, barevnost a pravidelnost. Preferujte přirozené zdroje, minimálně zpracované potraviny (NOVA I–II).',
+    protein: { mult: 1.2, label: '× kg váhy', note: 'Obecné doporučení ~1 g/kg, s rezervou pro běžně aktivního dospělého' },
+    carbs:   { mult: 3.0, label: '× kg váhy', note: 'Přirozené zdroje — celozrnné, luštěniny, ovoce, zelenina' },
+    fat:     { mult: 0.8, label: '× kg váhy', note: 'Přednost nenasyceným: olivový olej, ořechy, ryby (ω3 priorita)' },
+    carbRatio: 0.60,
+  },
+  sport_male: {
+    name: 'Sportovec — muž',
+    color: '#1A4A6E',
+    kcalOffset: +200,
+    offsetLabel: '+200 kcal nad TDEE',
+    note: 'Dle dokumentu: muži sportovci 1,4–1,7 g bílkovin/kg, sacharidy tvoří 60 % příjmu, tuky 20–30 %. Při silových sportech přičíst 0,2–0,3 g bílkovin. Sledovat mikrolживiny — Ca, Mg, vit. C, E, D, B.',
+    protein: { mult: 1.6, label: '× kg váhy', note: 'Muži: 1,4–1,7 g/kg (silový sport: až 2,0 g/kg)' },
+    carbs:   { mult: 5.0, label: '× kg váhy', note: '60 % energetického příjmu — komplexní + jednoduché kolem tréninku' },
+    fat:     { mult: 0.9, label: '× kg váhy', note: '20–30 % — nenasycené tuky, ω3 z ryb (losos, tuňák)' },
+    carbRatio: 0.65,
+  },
+  sport_female: {
+    name: 'Sportovkyně — žena',
+    color: '#6B3A6E',
+    kcalOffset: +150,
+    offsetLabel: '+150 kcal nad TDEE',
+    note: 'Dle dokumentu: ženy sportovkyně 1,3–1,5 g bílkovin/kg, sacharidy 60 % příjmu, tuky 20–30 %. Sledovat příjem Fe (1,5–2 mg ztráty menstruací), Ca a D3.',
+    protein: { mult: 1.4, label: '× kg váhy', note: 'Ženy: 1,3–1,5 g/kg (silový sport: až 1,8 g/kg)' },
+    carbs:   { mult: 4.5, label: '× kg váhy', note: '60 % energetického příjmu — komplexní zdroje' },
+    fat:     { mult: 0.9, label: '× kg váhy', note: '20–30 % — nenasycené tuky, pozor na min. tuk (ženy: 11–12 %)' },
+    carbRatio: 0.65,
+  },
+};
+
+function renderMacros(clientId) {
+  const c = clients.find(x => x.id === clientId);
+  const el = getF('macros-content');
+  if (!c) return;
+
+  if (!c.goal || !MACRO_PLANS[c.goal]) {
+    el.innerHTML = `<div class="macros-no-data"><div style="font-size:32px">🥗</div><p style="margin-top:8px">Není nastaven cíl klienta.<br>Upravte profil a vyberte cíl.</p></div>`;
+    return;
+  }
+  if (!c.weight) {
+    el.innerHTML = `<div class="macros-no-data"><div style="font-size:32px">⚖️</div><p style="margin-top:8px">Není zadána hmotnost klienta.<br>Zadejte hmotnost pro výpočet maker.</p></div>`;
+    return;
+  }
+
+  const plan   = MACRO_PLANS[c.goal];
+  const macros = calcClientMacros(c);
+  const { targetKcal, tdee, bmr, protein, carbs, fat, hasTdee, clampedToBMR } = macros;
+
+  const pct_p = Math.round((protein * 4 / targetKcal) * 100);
+  const pct_c = Math.round((carbs   * 4 / targetKcal) * 100);
+  const pct_f = Math.round((fat     * 9 / targetKcal) * 100);
+
+  const offsetSign  = plan.kcalOffset >= 0 ? '+' : '';
+  const offsetColor = plan.kcalOffset < 0 ? '#27AE60' : plan.kcalOffset > 0 ? '#E67E22' : 'var(--terra)';
+
+  const clampWarning = clampedToBMR ? `
+    <div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#92400E;line-height:1.5">
+      ⚠️ <strong>Příjem zastropován na BMR (${bmr} kcal)</strong> — vypočtený deficit by šel pod bazální metabolismus, což je fyziologicky nepřijatelné. Doporučený příjem byl nastaven na BMR. Zvažte zvýšení aktivity nebo mírnější deficit.
+    </div>` : '';
+
+  // TDEE comparison bar
+  let tdeeBar = '';
+  if (hasTdee) {
+    const refKcal = clampedToBMR ? bmr : tdee;
+    const pct = Math.min(100, Math.round((targetKcal / tdee) * 100));
+    const barColor = clampedToBMR ? '#F59E0B' : plan.kcalOffset < 0 ? '#34D399' : plan.kcalOffset > 0 ? '#FBBF24' : '#4A5E3A';
+    const subtitle = clampedToBMR
+      ? `Deficit by šel pod BMR → zastropováno na BMR (${bmr} kcal)`
+      : `${offsetSign}${plan.kcalOffset} kcal od TDEE (${plan.offsetLabel})`;
+    tdeeBar = `
+      <div style="background:var(--cream);border-radius:var(--r);padding:16px 20px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-size:13px;color:rgba(28,28,30,0.6)">Doporučený příjem vs. TDEE</span>
+          <span style="font-size:13px;font-weight:700">
+            <span style="color:${clampedToBMR ? '#92400E' : offsetColor}">${targetKcal} kcal</span>
+            <span style="color:rgba(28,28,30,0.4);font-weight:400"> / TDEE ${tdee} kcal</span>
+            ${bmr ? `<span style="color:rgba(28,28,30,0.3);font-weight:400"> / BMR ${bmr} kcal</span>` : ''}
+          </span>
+        </div>
+        <div style="background:var(--border);border-radius:4px;height:8px;overflow:hidden;position:relative">
+          ${bmr ? `<div style="position:absolute;left:0;top:0;height:100%;width:${Math.round(bmr/tdee*100)}%;background:rgba(28,28,30,0.15);border-radius:4px" title="BMR"></div>` : ''}
+          <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${barColor};border-radius:4px;transition:width 0.5s ease"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(28,28,30,0.4);margin-top:6px">
+          ${bmr ? `<span>BMR ${bmr} kcal</span>` : '<span></span>'}
+          <span style="color:${clampedToBMR ? '#92400E' : offsetColor};font-weight:700">${subtitle}</span>
+          <span>TDEE ${tdee} kcal</span>
+        </div>
+      </div>`;
+  }
+
+  el.innerHTML = `
+    <div class="macros-goal-card" style="background:linear-gradient(135deg,${plan.color} 0%,${plan.color}cc 100%)">
+      <div class="macros-goal-label">Cíl klienta</div>
+      <div class="macros-goal-name">${plan.name}</div>
+      <div class="macros-goal-sub">Váha: ${+c.weight} kg &nbsp;·&nbsp; ${hasTdee ? `TDEE: ${tdee} kcal → cíl: ${targetKcal} kcal` : plan.offsetLabel}</div>
+    </div>
+    ${clampWarning}
+    ${tdeeBar}
+    <div class="macros-grid">
+      <div class="macro-card protein">
+        <div class="macro-val">${protein}</div>
+        <div class="macro-unit">g / den</div>
+        <div class="macro-label">Bílkoviny</div>
+        <div class="macro-note" style="font-weight:700;color:rgba(28,28,30,0.7)">${plan.protein.mult} × kg · ${pct_p} % kcal</div>
+        <div class="macro-note">${plan.protein.note}</div>
+      </div>
+      <div class="macro-card carbs">
+        <div class="macro-val">${carbs}</div>
+        <div class="macro-unit">g / den</div>
+        <div class="macro-label">Sacharidy</div>
+        <div class="macro-note" style="font-weight:700;color:rgba(28,28,30,0.7)">${hasTdee ? `z cíl. kcal · ${pct_c} %` : `${plan.carbs.mult} × kg · ${pct_c} %`}</div>
+        <div class="macro-note">${plan.carbs.note}</div>
+      </div>
+      <div class="macro-card fat">
+        <div class="macro-val">${fat}</div>
+        <div class="macro-unit">g / den</div>
+        <div class="macro-label">Tuky</div>
+        <div class="macro-note" style="font-weight:700;color:rgba(28,28,30,0.7)">${hasTdee ? `z cíl. kcal · ${pct_f} %` : `${plan.fat.mult} × kg · ${pct_f} %`}</div>
+        <div class="macro-note">${plan.fat.note}</div>
+      </div>
+    </div>
+    <div class="macros-kcal-bar">
+      <div>
+        <span class="macros-kcal-label">Cílový denní příjem</span>
+        <div style="font-size:11px;color:rgba(28,28,30,0.4);margin-top:2px">${hasTdee ? 'Přizpůsobeno TDEE dle cíle' : 'Odhadnuto z tělesné hmotnosti (bez TDEE)'}</div>
+      </div>
+      <span class="macros-kcal-val" style="color:${offsetColor}">~${targetKcal} kcal</span>
+    </div>
+    <div class="macros-note-box">💡 ${plan.note}</div>
+    <div style="margin-top:12px;font-size:11px;color:rgba(28,28,30,0.35);line-height:1.6">
+      Zdroj: podklady Vojtěch Volejník — _STRAVA.docx. Hodnoty jsou orientační a je nutné je individuálně upravit.
+    </div>`;
+}
+
+// ══ DOCUMENTS ══
+async function loadDocuments(clientId) {
+  document.getElementById('docs-loading').style.display = 'block';
+  document.getElementById('docs-empty').style.display = 'none';
+  document.querySelectorAll('.doc-item').forEach(el => el.remove());
+
+  if (!useSupabase) {
+    document.getElementById('docs-loading').style.display = 'none';
+    document.getElementById('docs-empty').style.display = 'block';
+    return;
+  }
+
+  const { data, error } = await sb.storage
+    .from('documents')
+    .list(clientId + '/', { sortBy: { column: 'created_at', order: 'desc' } });
+
+  document.getElementById('docs-loading').style.display = 'none';
+
+  if (error || !data || data.length === 0) {
+    document.getElementById('docs-empty').style.display = 'block';
+    return;
+  }
+
+  const list = document.getElementById('docs-list');
+  data.forEach(file => {
+    const { data: urlData } = sb.storage.from('documents').getPublicUrl(clientId + '/' + file.name);
+    const url = urlData?.publicUrl;
+    const ext = file.name.split('.').pop().toLowerCase();
+    const iconMap = { pdf:'📄', jpg:'🖼', jpeg:'🖼', png:'🖼', doc:'📝', docx:'📝' };
+    const classMap = { pdf:'pdf', jpg:'img', jpeg:'img', png:'img', doc:'word', docx:'word' };
+    const icon = iconMap[ext] || '📎';
+    const cls  = classMap[ext] || 'other';
+    const size = file.metadata?.size ? formatSize(file.metadata.size) : '';
+    const date = file.created_at ? new Date(file.created_at).toLocaleDateString('cs-CZ') : '';
+
+    const item = document.createElement('div');
+    item.className = 'doc-item';
+    item.id = 'doc-' + file.name;
+    item.innerHTML = `
+      <div class="doc-item-left">
+        <div class="doc-icon ${cls}">${icon}</div>
+        <div>
+          <div class="doc-name">${file.name}</div>
+          <div class="doc-meta">${[size, date].filter(Boolean).join(' · ')}</div>
+        </div>
+      </div>
+      <div class="doc-actions">
+        <a class="doc-open-btn" href="${url}" target="_blank" rel="noopener">↗ Otevřít</a>
+        <button class="btn-sm danger" onclick="deleteDocument('${clientId}','${file.name}')">Smazat</button>
+      </div>`;
+    list.insertBefore(item, document.getElementById('docs-empty'));
+  });
+}
+
+async function uploadDocument(input) {
+  if (!input.files.length || !detailId) return;
+  if (!useSupabase) { showToast('⚠️ Nahrávání vyžaduje připojení k Supabase'); return; }
+
+  const file = input.files[0];
+  const maxMB = 20;
+  if (file.size > maxMB * 1024 * 1024) { showToast(`⚠️ Soubor je příliš velký (max ${maxMB} MB)`); return; }
+
+  const safeName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = detailId + '/' + safeName;
+
+  const prog = document.getElementById('upload-progress');
+  const bar  = document.getElementById('upload-progress-bar');
+  const lbl  = document.getElementById('upload-progress-label');
+  prog.style.display = 'flex';
+  bar.style.setProperty('--prog', '30%');
+  lbl.textContent = 'Nahrávání ' + file.name + '…';
+
+  try {
+    bar.style.setProperty('--prog', '60%');
+    const { error } = await sb.storage.from('documents').upload(path, file, { upsert: false });
+    bar.style.setProperty('--prog', '100%');
+    if (error) throw error;
+    lbl.textContent = '✓ Nahráno!';
+    setTimeout(() => { prog.style.display = 'none'; bar.style.setProperty('--prog','0%'); }, 1500);
+    showToast('✓ Dokument nahrán');
+    loadDocuments(detailId);
+  } catch(e) {
+    prog.style.display = 'none';
+    showToast('⚠️ Chyba nahrávání: ' + e.message);
+  }
+  input.value = '';
+}
+
+async function deleteDocument(clientId, fileName) {
+  if (!confirm('Smazat soubor "' + fileName + '"?')) return;
+  try {
+    const { error } = await sb.storage.from('documents').remove([clientId + '/' + fileName]);
+    if (error) throw error;
+    const el = document.getElementById('doc-' + fileName);
+    if (el) el.remove();
+    const remaining = document.querySelectorAll('.doc-item').length;
+    if (!remaining) document.getElementById('docs-empty').style.display = 'block';
+    showToast('Dokument smazán');
+  } catch(e) {
+    showToast('⚠️ Chyba: ' + e.message);
+  }
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB';
+  return (bytes/1024/1024).toFixed(1) + ' MB';
+}
+
+// ══ FOOD DIARY ══
+let foodLogs = [];
+
+async function loadDiary(clientId) {
+  document.getElementById('diary-loading').style.display = 'block';
+  if (useSupabase) {
+    const { data, error } = await sb.from('food_logs')
+      .select('*').eq('client_id', clientId)
+      .order('date', { ascending: false })
+      .order('created_at', { ascending: true });
+    foodLogs = error ? [] : (data || []);
+  } else {
+    foodLogs = JSON.parse(localStorage.getItem('vv_diary_' + clientId) || '[]');
+  }
+  document.getElementById('diary-loading').style.display = 'none';
+  renderDiary();
+}
+
+function renderDiary() {
+  const advisorLogs = foodLogs.filter(l => l.logged_by !== 'client');
+  renderDiaryCol('diary-advisor-list', advisorLogs, 'advisor');
+}
+
+function renderDiaryCol(elId, logs, source) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (!logs.length) {
+    el.innerHTML = `<div class="diary-empty">${source==='advisor' ? 'Zatím žádné záznamy.' : 'Klient zatím nic nezapsal.'}</div>`;
+    return;
+  }
+  // Group by date
+  const byDate = {};
+  logs.forEach(l => { (byDate[l.date] = byDate[l.date]||[]).push(l); });
+
+  el.innerHTML = Object.entries(byDate).sort((a,b)=>b[0].localeCompare(a[0])).map(([date, entries]) => {
+    const totalKcal = entries.reduce((s,e) => s + (+e.calories||0), 0);
+    const dateLabel = new Date(date+'T12:00:00').toLocaleDateString('cs-CZ',{weekday:'short',day:'numeric',month:'short'});
+    return `<div class="diary-day-group">
+      <div class="diary-day-label">
+        <span>${dateLabel}</span>
+        ${totalKcal ? `<span class="diary-day-total">∑ ${totalKcal} kcal</span>` : ''}
+      </div>
+      ${entries.map(e => `
+        <div class="diary-entry">
+          <div class="diary-entry-left">
+            <div class="diary-entry-meal">${e.meal||''}</div>
+            <div class="diary-entry-desc">${e.description}</div>
+            ${(e.protein||e.carbs||e.fat) ? `<div class="diary-entry-macros">B:${e.protein||0}g · S:${e.carbs||0}g · T:${e.fat||0}g</div>` : ''}
+            ${e.note ? `<div class="diary-entry-macros" style="font-style:italic">${e.note}</div>` : ''}
+          </div>
+          <div class="diary-entry-right">
+            ${e.calories ? `<span class="diary-entry-kcal">${e.calories}</span>` : ''}
+            ${source==='advisor' ? `<button class="diary-entry-del" onclick="deleteDiaryEntry('${e.id}')" title="Smazat">✕</button>` : ''}
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+function openDiaryModal() {
+  const c = clients.find(x => x.id === detailId);
+  document.getElementById('diary-modal-sub').textContent = c ? `${c.name} ${c.surname}` : '—';
+  document.getElementById('di-date').value = new Date().toISOString().split('T')[0];
+  ['di-desc','di-kcal','di-protein','di-carbs','di-fat','di-note'].forEach(id => getF(id).value = '');
+  getF('di-meal').value = 'Snídaně';
+  openModal('diary-modal');
+}
+
+async function saveDiaryEntry() {
+  const desc = getF('di-desc').value.trim();
+  if (!desc) { showToast('Vyplňte popis jídla'); return; }
+  const data = {
+    client_id:   detailId,
+    date:        getF('di-date').value,
+    meal:        getF('di-meal').value,
+    description: desc,
+    calories:    getF('di-kcal').value    || null,
+    protein:     getF('di-protein').value || null,
+    carbs:       getF('di-carbs').value   || null,
+    fat:         getF('di-fat').value     || null,
+    note:        getF('di-note').value.trim(),
+    logged_by:   'advisor',
+  };
+  const btn = getF('diary-save-btn'), txt = getF('diary-save-txt');
+  btn.disabled = true; txt.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;margin:0"></span>';
+  try {
+    if (useSupabase) {
+      const { data: row, error } = await sb.from('food_logs').insert([data]).select().single();
+      if (error) throw error;
+      foodLogs.unshift(row);
+    } else {
+      const row = { ...data, id:'dl_'+Date.now(), created_at:new Date().toISOString() };
+      foodLogs.unshift(row);
+      localStorage.setItem('vv_diary_'+detailId, JSON.stringify(foodLogs));
+    }
+    showToast('✓ Záznam přidán');
+    closeModal('diary-modal');
+    renderDiary();
+  } catch(e) { showToast('⚠️ Chyba: '+e.message); }
+  finally { btn.disabled=false; txt.textContent='Uložit záznam'; }
+}
+
+async function deleteDiaryEntry(id) {
+  if (!confirm('Smazat tento záznam?')) return;
+  try {
+    if (useSupabase) { const {error}=await sb.from('food_logs').delete().eq('id',id); if(error) throw error; }
+    foodLogs = foodLogs.filter(l => l.id !== id);
+    if (!useSupabase) localStorage.setItem('vv_diary_'+detailId, JSON.stringify(foodLogs));
+    renderDiary();
+    showToast('Záznam smazán');
+  } catch(e) { showToast('⚠️ Chyba: '+e.message); }
+}
+
+// ══ NUTRITION PLAN TAB ══
+// Zdroje: zápisky z kurzu PVS ATAC + DDD dle vyhl. ČR 450/2004, EFSA
+
+function renderNutritionPlan(clientId) {
+  const c = clients.find(x => x.id === clientId);
+  const el = document.getElementById('nutrition-content');
+  if (!c) return;
+
+  const macros = calcClientMacros(c);
+  const w = +c.weight || 70;
+  const goal = c.goal || 'maintain';
+  const isSport = goal === 'sport_male' || goal === 'sport_female';
+  const isFemale = c.gender === 'F';
+  const isMale = c.gender === 'M';
+  const age = +c.age || 30;
+
+  // ── Kalorický příjem ──────────────────────────────────────────────
+  const calcKcal = macros ? macros.targetKcal : null;
+  const customKcal = c.custom_kcal ? +c.custom_kcal : null;
+  const activeKcal = customKcal || calcKcal;
+
+  // ── Makronutrienty ─────────────────────────────────────────────────
+  // Přepočítáme makra dle aktivního příjmu kcal
+  let protein = macros ? macros.protein : Math.round(1.5 * w);
+  let carbs    = macros ? macros.carbs   : null;
+  let fat      = macros ? macros.fat     : null;
+
+  if (activeKcal && customKcal && macros) {
+    // Při vlastním příjmu: protein pevný, zbývající kcal rozdělíme dle carbRatio
+    const plan = MACRO_PLANS[goal] || MACRO_PLANS.maintain;
+    const protKcal = protein * 4;
+    const rem = Math.max(activeKcal - protKcal, 0);
+    carbs = Math.round((rem * plan.carbRatio) / 4);
+    fat   = Math.round((rem * (1 - plan.carbRatio)) / 9);
+  }
+
+  const totalKcal = protein && carbs && fat ? protein*4 + carbs*4 + fat*9 : activeKcal;
+  const pP = totalKcal ? Math.round(protein*4/totalKcal*100) : 0;
+  const pC = totalKcal ? Math.round((carbs||0)*4/totalKcal*100) : 0;
+  const pF = totalKcal ? Math.round((fat||0)*9/totalKcal*100) : 0;
+
+  const macroRows = [
+    { name: 'Bílkoviny', val: protein, unit: 'g', kcal: protein*4, pct: pP, color: '#4A5E3A',
+      note: `${(protein/w).toFixed(1)} g/kg • základ svalové hmoty, enzymy, hormony` },
+    { name: 'Sacharidy', val: carbs, unit: 'g', kcal: (carbs||0)*4, pct: pC, color: '#C9956A',
+      note: carbs ? `${(carbs/w).toFixed(1)} g/kg • hlavní zdroj energie, GI zohledňovat` : '—' },
+    { name: 'Tuky', val: fat, unit: 'g', kcal: (fat||0)*9, pct: pF, color: '#E67E22',
+      note: fat ? `${(fat/w).toFixed(1)} g/kg • ω3:ω6 = 1:3–5, trans-MK max. 1 %` : '—' },
+    { name: 'Vláknina', val: activeKcal ? Math.round(activeKcal/2000*30) : 30, unit: 'g', kcal: null, pct: null, color: '#3A4D2C',
+      note: '25–35 g/den (30 g na 2000 kcal) • rozpustná:nerozpustná ≈ 1:3' },
+  ];
+
+  // ── Vitamíny a minerály ─────────────────────────────────────────────
+  // DDD dle vyhl. ČR 450/2004 + zápisky z kurzu ATAC + EFSA
+  const vitamins = [
+    { name: 'Vitamín D3', ddd: '20 µg (800 IU)', note: 'Imunita, vstřebávání Ca, sval. funkce. Deficit u 80 % populace v ČR (podzim–zima). Brát s tučným jídlem.', tags: ['key', isSport ? 'sport' : null, 'key'] },
+    { name: 'Vitamín C', ddd: '80 mg', note: 'Antioxidant, imunita, tvorba kolagenu, vstřebávání Fe. Brát ve 2 dávkách (vylučuje se rychle).', tags: ['key'] },
+    { name: 'Vitamín B12', ddd: '2,4 µg', note: 'Nervy, krvetvorba, DNA syntéza. Vegetariáni/vegani: nutná suplementace.', tags: isFemale ? ['women'] : [] },
+    { name: 'Vitamín B6', ddd: '1,4 mg', note: 'Metabolismus bílkovin a aminokyselin, serotonin, imunita. Důležitý při vyšším příjmu bílkovin.', tags: isSport ? ['sport'] : [] },
+    { name: 'Vitamín A', ddd: '800 µg', note: 'Zrak, imunita, kůže. Zásobní vitamín — dávkovat opatrně, nepřekračovat ODD.', tags: [] },
+    { name: 'Vitamín E', ddd: '12 mg', note: 'Antioxidant, ochrana buněk, ω-3 stabilizace. Sportovci mají vyšší potřebu.', tags: isSport ? ['sport'] : [] },
+    { name: 'Vitamín K2', ddd: '75 µg', note: 'Ukládání Ca do kostí (ne do cév). Kombinovat s D3 + Ca pro max. efekt.', tags: ['key'] },
+    { name: 'Kyselina listová (B9)', ddd: isFemale && age < 45 ? '400 µg (+' : '200 µg', note: isFemale && age < 45 ? 'Ženy: 400 µg/den, plánování těhotenství: 600 µg. DNA syntéza, krvetvorba.' : 'DNA syntéza, krvetvorba, nervová soustava.', tags: isFemale ? ['women'] : [] },
+  ];
+
+  const minerals = [
+    { name: 'Hořčík (Mg)', ddd: isMale ? '350 mg' : '300 mg', note: 'Svalová relaxace, nervy, 300+ enzymů. Deficit = křeče, nespavost. Glycinát/citrát nejlépe vstřebatelné.', tags: ['key', isSport ? 'sport' : null] },
+    { name: 'Vápník (Ca)', ddd: '800 mg', note: 'Kosti, zuby, srdeční funkce. Poměr Ca:Mg = 2–2,5:1. Brát odděleně od Fe.', tags: isFemale ? ['women'] : [] },
+    { name: 'Železo (Fe)', ddd: isFemale ? '14 mg' : '8 mg', note: isFemale ? 'Ženy: vyšší potřeba (menstruace −1,5–2 mg). Brát dopoledne s vit. C, ne s mlékem/kávou/vlákninou.' : 'Přenašeč kyslíku, imunita. Organické formy lépe vstřebatelné.', tags: isFemale ? ['women', 'key'] : [] },
+    { name: 'Zinek (Zn)', ddd: '10 mg', note: 'Imunita, hojení, testosteron, DAO enzym. Nebrát s mlékem, kávou ani Fe. Glutáminát/citrát lépe než oxid.', tags: isSport ? ['sport'] : [] },
+    { name: 'Selen (Se)', ddd: '55 µg', note: 'Antioxidant, štítná žláza, imunita. Brazilský ořech = 70–90 µg/ks. Nepřekračovat 400 µg/den.', tags: [] },
+    { name: 'Jód (I)', ddd: '150 µg', note: 'Štítná žláza, tvorba hormonů T3/T4. Mořské produkty, jodovaná sůl. Hypotyreóza: sledovat.', tags: [] },
+    { name: 'Draslík (K)', ddd: '2 000 mg', note: 'TK regulace, svalová funkce, hydratace. Přírodní zdroje: banán, brambor, avokádo, luštěniny.', tags: isSport ? ['sport'] : [] },
+    { name: 'Fosfor (P)', ddd: '700 mg', note: 'Kosti, buněčné membrány, ATP. Poměr Ca:P sledovat. Nadbytek zpracovaných potravin = přebytek P.', tags: [] },
+  ];
+
+  const tagHTML = (tags) => tags.filter(Boolean).map(t =>
+    t === 'key'   ? `<span class="vit-tag vit-tag-key">Klíčový</span>` :
+    t === 'sport' ? `<span class="vit-tag vit-tag-sport">Sport</span>` :
+    t === 'women' ? `<span class="vit-tag vit-tag-women">Ženy</span>` : ''
+  ).join(' ');
+
+  el.innerHTML = `
+    <!-- KALORICKÝ PŘÍJEM -->
+    <div class="nutrition-section">
+      <div class="nutrition-section-title">Kalorický příjem</div>
+      <div class="nutrition-kcal-row">
+        ${calcKcal ? `
+          <div class="nutrition-kcal-block">
+            <span class="nutrition-kcal-val">${calcKcal}</span>
+            <span class="nutrition-kcal-label">Vypočítaný příjem (TDEE${macros.clampedToBMR ? ', min. BMR' : macros.kcalOffset ? ' ± offset' : ''})</span>
+          </div>
+          <span class="nutrition-kcal-sep">→</span>` : ''}
+        <div class="nutrition-kcal-block">
+          <span class="nutrition-kcal-val" style="color:${customKcal ? 'var(--sage-d)' : 'var(--terra)'}">${activeKcal || '—'}</span>
+          <span class="nutrition-kcal-label">${customKcal ? '✏️ Vlastní příjem (přepsaný)' : 'Aktivní příjem'}</span>
+        </div>
+        <div class="nutrition-custom-wrap">
+          <input class="nutrition-custom-input" id="custom-kcal-input" type="number"
+                 placeholder="${calcKcal || 'kcal'}" value="${customKcal || ''}"
+                 min="800" max="6000">
+          <button class="nutrition-custom-btn" onclick="saveCustomKcal()">Uložit</button>
+          ${customKcal ? `<button class="nutrition-custom-clear" onclick="clearCustomKcal()">Reset</button>` : ''}
+        </div>
+      </div>
+      <p class="nutrition-note">
+        ${calcKcal
+          ? `Vypočítáno: BMR ${macros.bmr || '—'} kcal × PAL ${c.activity || 1.55} = TDEE ${macros.tdee || '—'} kcal ${macros.kcalOffset ? (macros.kcalOffset > 0 ? '+' : '') + macros.kcalOffset + ' kcal (cíl)' : ''}${macros.clampedToBMR ? ' — zastropováno na BMR' : ''}.`
+          : 'Doplňte věk, výšku, váhu a pohlaví pro automatický výpočet.'}
+        Vlastní příjem přepíše vypočítanou hodnotu a přizpůsobí makra.
+      </p>
+    </div>
+
+    <!-- MAKRONUTRIENTY -->
+    <div class="nutrition-section">
+      <div class="nutrition-section-title">Makronutrienty / den</div>
+      <table class="macro-table">
+        <thead>
+          <tr>
+            <th>Živina</th>
+            <th>Množství</th>
+            <th>kcal</th>
+            <th>%</th>
+            <th class="macro-bar-cell">Podíl</th>
+            <th>Poznámka (dle kurzu)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${macroRows.map(r => `
+            <tr>
+              <td class="macro-name">${r.name}</td>
+              <td><b>${r.val ?? '—'} ${r.val ? r.unit : ''}</b></td>
+              <td style="color:rgba(28,28,30,0.5)">${r.kcal ? r.kcal + ' kcal' : '—'}</td>
+              <td style="color:rgba(28,28,30,0.5)">${r.pct != null ? r.pct + ' %' : '—'}</td>
+              <td class="macro-bar-cell">
+                ${r.pct != null ? `<div class="macro-bar-wrap"><div class="macro-bar-fill" style="width:${r.pct}%;background:${r.color}"></div></div>` : '—'}
+              </td>
+              <td style="font-size:12px;color:rgba(28,28,30,0.55)">${r.note}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- VITAMÍNY -->
+    <div class="nutrition-section">
+      <div class="nutrition-section-title">Vitamíny — DDD dle vyhl. ČR 450/2004 + EFSA</div>
+      <div class="vit-grid">
+        ${vitamins.map(v => `
+          <div class="vit-card">
+            <div class="vit-name">${v.name}</div>
+            <div class="vit-ddd">DDD: <b>${v.ddd}</b></div>
+            <div class="vit-note">${v.note}</div>
+            <div>${tagHTML(v.tags)}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- MINERÁLY -->
+    <div class="nutrition-section">
+      <div class="nutrition-section-title">Minerály — DDD dle vyhl. ČR 450/2004 + EFSA</div>
+      <div class="vit-grid">
+        ${minerals.map(v => `
+          <div class="vit-card">
+            <div class="vit-name">${v.name}</div>
+            <div class="vit-ddd">DDD: <b>${v.ddd}</b></div>
+            <div class="vit-note">${v.note}</div>
+            <div>${tagHTML(v.tags)}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div style="font-size:11px;color:rgba(28,28,30,0.3);margin-top:8px;line-height:1.6">
+      Zdroje: zápisky z kurzu PVS ATAC · Vyhláška ČR č. 450/2004 Sb. a novela 330/2009 Sb. · EFSA Dietary Reference Values · Hodnoty jsou orientační — individualizujte dle stavu klienta.
+    </div>
+  `;
+}
+
+async function saveCustomKcal() {
+  const val = document.getElementById('custom-kcal-input').value;
+  const kcal = val ? +val : null;
+  if (kcal && (kcal < 800 || kcal > 6000)) { showToast('Zadejte reálnou hodnotu (800–6000 kcal)'); return; }
+  try {
+    if (useSupabase) {
+      const { error } = await sb.from('clients').update({ custom_kcal: kcal }).eq('id', detailId);
+      if (error) throw error;
+    }
+    const i = clients.findIndex(c => c.id === detailId);
+    if (i !== -1) clients[i].custom_kcal = kcal;
+    showToast(kcal ? `✓ Vlastní příjem nastaven na ${kcal} kcal` : '✓ Reset na vypočítaný příjem');
+    renderNutritionPlan(detailId);
+  } catch(e) { showToast('⚠️ Chyba: ' + e.message); }
+}
+
+async function clearCustomKcal() {
+  document.getElementById('custom-kcal-input').value = '';
+  await saveCustomKcal();
+}
+
+// ══ AI ADVISOR — OFFLINE PRAVIDLOVÝ SYSTÉM ══
+// Funguje bez internetu a bez API klíče — pravidla vycházejí z odborných dokumentů
+
+let aiCurrentClientId = null;
+
+// ── DATABÁZE PRAVIDEL ──
+const RULES = {
+
+  diseases: {
+    'cukrovk':        { label:'Diabetes', warn:['Omezit jednoduché cukry (med, cukr, džusy)', 'Orientovat se na nízký GI a GN — celozrnné, luštěniny, zelenina', 'Záporná energetická bilance při nadváze', 'Kontrola tuků: nasyc.:nenasyc. = 1:2', '3 hlavní jídla, stabilní glykémie'], suppl:['Chrom-GTF', 'Omega-3', 'Vitamín B komplex', 'Hořčík'], avoid:['Cukr, med, džemy, sladkosti', 'Bílá mouka a bílá rýže', 'Sladké nápoje a alkohol', 'Přepálené tuky'] },
+    'diabet':         { label:'Diabetes', warn:['Omezit jednoduché cukry', 'Orientovat se na nízký GI a GN', 'Záporná EB při nadváze', '3 hlavní jídla'], suppl:['Chrom-GTF', 'Omega-3', 'B komplex', 'Hořčík'], avoid:['Cukr a sladkosti', 'Bílá mouka', 'Sladké nápoje', 'Alkohol'] },
+    'hypothyreó':     { label:'Hypotyreóza', warn:['Dostatek jódu — mořské produkty, mořské řasy', 'Dostatek Se, Zn, Cu pro funkci štítné žlázy', 'Více sacharidů zrychluje metabolismus (při snížené funkci)', 'Tepelně upravovat brukvovitou zeleninu — syrová obsahuje strumigeny'], suppl:['Selen 55 µg/den', 'Zinek', 'Jód', 'Vitamín D'], avoid:['Syrová brokolice, zelí, kapusta (strumigeny)', 'Nadbytek tuků (zpomalují metabolismus)'] },
+    'hyperthyreó':    { label:'Hypertyreóza', warn:['Omezit příjem jódu', 'Méně sacharidů', 'Sledovat Ca:Mg', 'Zvýšená potřeba energie (zrychlený metabolismus)'], suppl:['Vápník', 'Hořčík', 'Antioxidanty'], avoid:['Mořské plody (vysoký jód)', 'Nadbytek jódu ze suplementů'] },
+    'pálení žáhy':    { label:'Pálení žáhy / Reflux', warn:['5–6 menších porcí denně', 'Nejíst 3 hodiny před spaním', 'Po jídle vstát a chodit', 'Udržovat tělesnou hmotnost'], suppl:['Aloe vera', 'Zázvor', 'Kurkuma'], avoid:['Tučná jídla', 'Alkohol, káva, čokoláda', 'Perlivé nápoje', 'Rajčata, citrusy, cibule, česnek', 'Ostré koření'] },
+    'gastrit':        { label:'Gastritida', warn:['Menší porce, šetřící dieta', 'Vyhýbat se dráždivým potravinám', 'Omezit stres'], suppl:['Aloe vera', 'Zázvor', 'Probiotika'], avoid:['Kořeněná jídla', 'Smažené a tučné', 'Alkohol, káva', 'Kyselé potraviny'] },
+    'crohn':          { label:'Crohnova choroba', warn:['POZOR: Chronické onemocnění vyžaduje individuální přístup', '5–6 malých porcí denně', 'Nepromíchávat tuhé a tekuté', 'Monitorovat příjem živin — vysoké riziko deficitů'], suppl:['Železo (organické) + vit. C', 'B komplex, C, D, K', 'Vápník', 'Omega-3 (pozor na krvácení — konzultovat)', 'Probiotika a prebiotika (opatrně)'], avoid:['Nerozpustná vláknina (při zánětu)', 'Potraviny s vysokým histaminem', 'Mléčné výrobky (individuálně)', 'Uzeniny, citrusy, kvasnice', 'Tučné, smažené, alkohol', 'Lepek'] },
+    'ibs':            { label:'Syndrom dráždivého tračníku', warn:['FODMAP dieta — omezit: cibuli, česnek, pšenici, luštěniny, laktózu, fruktózu', 'Navyšovat vlákninu postupně', 'Probiotika pravidelně'], suppl:['Probiotika', 'Prebiotika', 'Hořčík'], avoid:['Alkohol, čokoláda, kofein', 'Tučné a fast food', 'Laktóza (individuálně)', 'Cibule, česnek, pšenice'] },
+    'celiakie':       { label:'Celiakie', warn:['PŘÍSNÁ bezlepková dieta — žádné výjimky', 'Lepek v: pšenici, žitu, ječmeni, ovsu', 'Sledovat deficit: Ca, Fe, B komplex, D', 'Zvýšené riziko osteoporózy a anémie'], suppl:['Vápník + D', 'Železo', 'B komplex (B12 zejm.)', 'Zinek'], avoid:['Pšenice, žito, ječmen, oves', 'Skryté zdroje lepku (omáčky, léky, uzeniny)'] },
+    'laktózov':       { label:'Laktózová intolerance', warn:['Eliminovat mléčný cukr', 'Fermentované výrobky (jogurt, kefír) bývají lépe tolerovány', 'Zajistit alternativní zdroje Ca'], suppl:['Vápník', 'Vitamín D', 'Laktáza (enzym před konzumací)'], avoid:['Čerstvé mléko', 'Smetana, zmrzlina', 'Měkké sýry s vyšším obsahem laktózy'] },
+    'histamin':       { label:'Histaminová intolerance', warn:['Vždy nejčerstvější potraviny', 'Aktivitu DAO podporovat vitamíny: B6, B9, B12, Mg, Fe, Zn', 'Omezit nadbytek bílkovin v tlustém střevě'], suppl:['Vitamín B6, B9, B12', 'Hořčík', 'Železo', 'Zinek', 'DAO enzymy (před jídlem)'], avoid:['Zrající sýry (parmazán, gouda)', 'Uzeniny a konzervované maso', 'Fermentované potraviny (víno, ocet, pickles)', 'Rajčata, špenát, avokádo, banány', 'Alkohol', 'Čokoláda'] },
+    'zánětu':         { label:'Chronický zánět', warn:['Protizánětlivá dieta — základ léčby', 'Sledovat poměr Omega-3:Omega-6 = 1:3–5', 'Záporná nebo neutrální energetická bilance', 'Dostatečný příjem antioxidantů'], suppl:['Omega-3 (EPA a DHA)', 'Vitamín D', 'Kurkumin', 'Vitamín C + E', 'Probiotika'], avoid:['Alkohol', 'Rafinovaný cukr', 'Přebytek fruktózy', 'Polotovary a konzervy', 'Uzeniny a přepálené tuky', 'Grilované a smažené'] },
+    'zánět':          { label:'Zánět', warn:['Protizánětlivá dieta', 'Omega-3 priorita', 'Antioxidanty'], suppl:['Omega-3', 'Vit. D', 'Kurkumin', 'Vit. C + E'], avoid:['Alkohol', 'Cukr', 'Polotovary', 'Smažené a grilované'] },
+    'osteoporóz':     { label:'Osteoporóza', warn:['Ca, Mg, P, F = základ mineralizace kostí', 'Vit. D klíčový — bez něj se Ca nevstřebává', 'Fyzická aktivita nezbytná (zatěžovat celé tělo)', 'Příliš vysoká vláknina snižuje vstřebávání Ca'], suppl:['Vitamín D3', 'Vápník (jen při deficitu — organické formy)', 'CLA', 'Hořčík'], avoid:['Nadbytek vlákniny (antinutriční efekt na Ca)', 'Alkohol', 'Kouření'] },
+    'bechtěrev':      { label:'Bechtěrevova choroba', warn:['Podpora K2 pro metabolismus Ca', 'Adekvátní Ca:Mg', 'Protizánětlivá dieta — priorita', 'Omega-3 pro potlačení zánětu'], suppl:['Omega-3', 'Boswelie extrakt', 'CLA', 'Inulin', 'Vitamín K2'], avoid:['Alkohol', 'Přepálené tuky', 'Nadbytek cukrů'] },
+    'artróz':         { label:'Artróza', warn:['Bílkoviny + vit. C pro stavbu chrupavky', 'Antioxidanty a vláknina', 'Kontrola hmotnosti — snížit zátěž kloubů'], suppl:['Glukosamin', 'Chondroitin', 'MSM', 'Omega-3', 'Vitamín C + E'], avoid:['Přebytek cukrů a aditiv', 'Přebytek masa', 'Bílá mouka'] },
+    'hypertenz':      { label:'Hypertenze', warn:['Omezit sůl — max. 5–6 g/den', 'Upravit Ca:Mg a Na:K', 'Zvýšit vlákninu a antioxidanty', 'Omezit alkohol a kofein'], suppl:['Hořčík', 'Draslík', 'Česnek', 'Omega-3'], avoid:['Sůl a solené potraviny', 'Alkohol', 'Kofein (nadbytek)', 'Uzeniny a konzervy'] },
+    'ateroskleróz':   { label:'Ateroskleróza', warn:['Záporná energetická bilance', 'Dostatek vlákniny nad běžné hodnoty', 'Antioxidanty (A, C, E)', 'Vyšší podíl rostlinných potravin', 'Pozor na tepelnou úpravu vajec — nesmažit'], suppl:['Omega-3', 'Vitamín E (přírodní)', 'Fytosteroly', 'Vitamín C'], avoid:['Nasycené tuky a trans-MK', 'Přebytek živočišných bílkovin', 'Přebytek sacharidů', 'Alkohol', 'Kouření'] },
+    'ichs':           { label:'ICHS', warn:['Kontrola LDL cholesterolu', 'Záporná EB', 'Omezit nasycené tuky', 'Omega-3 priorita'], suppl:['Omega-3', 'Fytosteroly', 'Koenzym Q10', 'Vitamín E'], avoid:['Nasycené a trans-MK', 'Přebytek soli', 'Alkohol'] },
+    'steatóz':        { label:'Steatóza jater', warn:['Záporná energetická bilance', 'Omezit tuky pod 25 %', 'Pozor na fruktózu ve slazených nápojích', 'Omezit alkohol — absolutně', 'Kontrola poměru nasyc.:nenasyc. = 1:2'], suppl:['Antioxidanty', 'Omega-3', 'Lecithin', 'Silymarín (milk thistle)'], avoid:['Alkohol ABSOLUTNĚ', 'Fruktóza v nápojích', 'Nadbytek tuků', 'Nadbytek bílkovin', 'Smažené a přepálené'] },
+    'žlučník':        { label:'Onemocnění žlučníku', warn:['Omezit tuky na 55 g/den', '5–6 menších porcí', 'Pokrmy vařené do měkka', 'Vyloučit přepálené tuky'], suppl:['Hořčík', 'Vláknina'], avoid:['Přepálené tuky', 'Ostré koření', 'CO2 nápoje', 'Alkohol', 'Tučné potraviny', 'Smažené'] },
+    'pankreat':       { label:'Pankreatitida', warn:['5–6 porcí denně', 'Nízkotučná dieta — max. 50–60 g tuků/den', 'Vysokoproteinová: 1,5–2 g/kg', 'ABSOLUTNÍ zákaz alkoholu', 'Minimálně 3h před spánkem nejíst'], suppl:['Vitamíny B, C, D, E', 'MCT tuky (jako zdroj tuku)', 'Minerály', 'Antioxidanty'], avoid:['Alkohol ABSOLUTNĚ', 'Tučné potraviny', 'Nadbytek vlákniny', 'Smažené'] },
+    'ledvin':         { label:'Onemocnění ledvin', warn:['Nízkobílkovinná dieta — snížit na 50 % DDD', 'Preference plnohodnotných bílkovin', 'Minimální sůl', 'Dostatečný pitný režim'], suppl:['Vitamín C (z ovocných šťáv)', 'Vitamín D'], avoid:['Přebytek bílkovin', 'Sůl a solená jídla', 'Draslík při selhání ledvin'] },
+    'dna ':           { label:'Dnavá artritida', warn:['Omezit puriny', 'Dostatečný pitný režim', 'Kontrola hmotnosti'], suppl:['Omega-3', 'Vitamín E', 'B komplex'], avoid:['Vnitřnosti', 'Sardiny, ančovičky', 'Drůbež ve velkém množství', 'Luštěniny (nadbytek)', 'Alkohol', 'Bílé pečivo', 'Smažené'] },
+    'depress':        { label:'Deprese / Psychika', warn:['Tryptofan → serotonin: ryby a mléčné výrobky', 'Diverzita střevní mikrobioty — klíčová', 'Pravidelné jídlo a dostatečný příjem energie', 'Dostatek mikroživin'], suppl:['B komplex + C', 'Ca + Mg', 'Omega-3', 'Třezalka (nekombinovat s léky!)'], avoid:['Alkohol', 'Nadbytek cukrů', 'Vynechávání jídel'] },
+    'únavov':         { label:'Chronická únava', warn:['Analýza celkového jídelníčku — pestrost a kvalita', 'Adaptogeny pro podporu adrenálních žláz', 'Dostatek mikroživin'], suppl:['Adaptogeny (ženšen)', 'Echinacea', 'Antioxidanty', 'B komplex'], avoid:['Alkohol', 'Nadbytek cukrů', 'Průmyslově zpracované potraviny'] },
+    'adhd':           { label:'ADHD', warn:['Nízký GI — stabilní glykémie snižuje neklidnost', 'Dostatečný pitný režim', 'Omezit aditiva a umělá barviva'], suppl:['Omega-3', 'Zinek, železo, hořčík', 'B komplex', 'Vitamín D'], avoid:['Cukr a sladkosti', 'Umělá barviva a konzervanty', 'Červené maso (velké množství)', 'Smažené potraviny'] },
+    'parkinson':      { label:'Parkinsonova choroba', warn:['Obecná nutriční rovnováha', 'Sledovat příjem bílkovin při L-DOPA terapii (načasování)'], suppl:['B komplex', 'Antioxidanty', 'Omega-3'], avoid:['Nadbytek bílkovin při ranní dávce L-DOPA'] },
+    'alzheimer':      { label:'Alzheimerova choroba', warn:['Zvýšit antioxidační kapacitu organismu', 'Kontrola acidobazické rovnováhy', 'Potlačit zánětlivé procesy'], suppl:['Ginkgo biloba', 'B komplex', 'Lecithin', 'Adaptogeny', 'Omega-3'], avoid:['Nadbytek masa', 'Kravské mléčné výrobky (omezit)', 'Alkohol'] },
+    'endometrióz':    { label:'Endometrióza', warn:['Protizánětlivá dieta — základ', 'Omega-3 (EPA a DHA) potlačují zánět', 'Vláknina snižuje obsah estrogenu', 'Omezit sójové výrobky (fytoestrogeny)'], suppl:['Omega-3', 'Vitamín D + Ca', 'Hořčík', 'Vitamín E'], avoid:['Červené maso (ω6 → prozánětlivé látky)', 'Sója ve velkém množství', 'Alkohol', 'Nasycené a trans-MK'] },
+    'pms':            { label:'PMS / Premenstruační syndrom', warn:['Vyrovnaný příjem Ca a Mg — řídí nervosvalovou koordinaci', 'Snížit příjem cukru (překyselení)', 'B komplex základ'], suppl:['Ca + Mg (poměr 2,5:1)', 'B komplex', 'GLA (pupalkový olej)', 'Omega-3'], avoid:['Cukr a sladkosti', 'Alkohol', 'Nadbytek živočišných bílkovin (kys. arachidonová → křeče)'] },
+    'menopauza':      { label:'Menopauza', warn:['Sledovat Ca a Mg — hustota kostí', 'Zvýšit vit. D', 'Fytoestrogeny z luštěnin a lněných semen', 'Dostatečný příjem bílkovin (úbytek svalové hmoty)'], suppl:['Vitamín D3', 'Ca + Mg', 'Omega-3', 'Fytoestrogeny (sója, len)'], avoid:['Alkohol (narušuje hormony)', 'Nadbytek soli', 'Kouření'] },
+    'kandidóz':       { label:'Kandidóza', warn:['Protikvasinková dieta', 'Vyloučit vše co kvasinkám "krmí"', 'Česnek a kokosový olej — antimikrobiální'], suppl:['Probiotika (po antibiotikách)', 'Prebiotika', 'Extrakt z grepových jader', 'Česnek extrakt'], avoid:['Cukr', 'Alkohol', 'Bílá mouka', 'Droždí (kvasnice)', 'Brambory, batáty (škrob)'] },
+    'roztroušen':     { label:'Roztroušená skleróza', warn:['Zvýšit antioxidační kapacitu', 'Podpora tvorby mastných kyselin — nerv. buňky', 'Zmírňovat zánětlivé procesy'], suppl:['Omega-3', 'Vitamín D', 'Lecithin (ořechy, semena)', 'B komplex', 'Vitamín C + E'], avoid:['Nadbytek živočišných bílkovin', 'Sladkosti a aditiva'] },
+    'akné':           { label:'Akné', warn:['Sledovat GI a GN — výkyvy glykémie zhoršují akné', 'Dostatek vlákniny', 'Omezit mléčné výrobky'], suppl:['Omega-3', 'Vitamín B6 (v B komplexu)', 'Vitamín C + bioflavonoidy', 'Vitamín E', 'Beta-karoten', 'Zinek'], avoid:['Sladkosti a cukr', 'Čokoláda', 'Alkohol, káva', 'Přebytek mléčných výrobků'] },
+  },
+
+  allergies: {
+    'ořech':    { label:'Alergie na ořechy', warn:['Nahradit ω3: lněná semena, chia, konopná semena, tučné ryby', 'Nahradit zdravé tuky: avokádo, olivový olej', 'Nahradit vit. E: olivový olej, slunečnicová semena, špenát', 'Sledovat skryté alergeny v potravinách (etikety!)'], avoid:['Vlašské ořechy', 'Mandle', 'Kešu, pistácie, para ořechy', 'Arašídy (technicky luštěnina, ale křížová reaktivita)', 'Ořechová másla a oleje', 'Müsli a cereálie s ořechy'] },
+    'lepek':    { label:'Intolerance/alergie lepku', warn:['Vyloučit pšenici, žito, ječmen, oves', 'Bezlepkové obiloviny: rýže, kukuřice, pohanka, quinoa, proso', 'Sledovat skryté zdroje: omáčky, uzeniny, léky', 'Sledovat deficity: Ca, Fe, B komplex, D'], avoid:['Pšenice (mouka, těstoviny, pečivo)', 'Žito, ječmen, oves', 'Skryté zdroje lepku'] },
+    'laktóz':   { label:'Laktózová intolerance', warn:['Fermentované výrobky (jogurt, kefír) obvykle tolerovány', 'Alternativní Ca: sardinky, brokolice, sezam, tofu', 'Vitamín D pro vstřebávání Ca'], avoid:['Čerstvé mléko', 'Smetana', 'Měkké sýry', 'Zmrzlina'] },
+    'vejce':    { label:'Alergie na vejce', warn:['Nahradit bílkoviny: luštěniny, maso, ryby, sójové výrobky', 'Sledovat skryté vajíčko v pečivu, těstovinách, majonéze', 'Kontrolovat etikety: lecithin, albumin, globulin, lysozym'], avoid:['Vejce a výrobky s vejci', 'Majonéza', 'Některé druhy pečiva'] },
+    'sója':     { label:'Alergie na sóju', warn:['Sója je skrytá v mnoha průmyslových výrobcích', 'Nahradit: luštěniny (čočka, cizrna, hrách)', 'Kontrolovat etikety (sójový lecitin, tofu, miso, tempeh)'], avoid:['Sójové mléko, tofu, tempeh, miso', 'Výrobky se sójovým lecithinem'] },
+    'pyl':      { label:'Alergie na pyly/trávy', warn:['Možná křížová reaktivita s potravinami', 'Jablko, hruška, třešně, broskve — při alergii na břízu', 'Mrkev, celer — křížová reaktivita s pylem', 'Při akutní sezoně sledovat příznaky'], avoid:['Syrové ovoce a zelenina s křížovou reaktivitou (individuální)'] },
+    'augmentin': { label:'Alergie na augmentin (penicilin)', warn:['Jde o lékovou alergii — vliv na stravu minimální', 'Po antibiotikách VŽDY obnovit střevní mikrobiotu', 'Fermentované potraviny a probiotika klíčové'], suppl:['Probiotika (5–10 mld. CFU/den)', 'Prebiotika', 'Kefír, jogurt'], avoid:[] },
+    'penicil':  { label:'Alergie na penicilin', warn:['Po antibiotikách obnovit střevní mikrobiotu', 'Fermentované potraviny a probiotika'], suppl:['Probiotika', 'Prebiotika'], avoid:[] },
+    'antibiot': { label:'Alergie na antibiotika', warn:['Po antibiotikách obnovit střevní mikrobiotu', 'Probiotika a fermentované potraviny klíčové'], suppl:['Probiotika', 'Prebiotika'], avoid:[] },
+  },
+
+  goals: {
+    'loss':         { name:'Hubnutí', protein:'1,8 g/kg (ochrana svalů)', carbs:'2–3 g/kg (nízkosacharidová)', fat:'0,8 g/kg', approach:'Záporná energetická bilance −450 kcal od TDEE. Priorita: komplexní sacharidy, dostatek bílkovin pro ochranu svalové hmoty, zdravé tuky. Vláknina pro sytost (25–35 g/den).', tips:['Preferovat potraviny s nízkým GI a GN', 'Vláknina prodlužuje sytost', 'Fermentované potraviny pro mikrobiotu', 'Omezit alkohol — 7 kcal/g, prázdné kalorie'] },
+    'gain':         { name:'Nabírání svalové hmoty', protein:'2,0 g/kg (silový sport: 1,4–1,7 g + 0,2–0,3 g)', carbs:'4–6 g/kg (vysokosacharidová, 60 % energie)', fat:'1,0 g/kg (20–30 %)', approach:'Kalorický přebytek +350 kcal nad TDEE. Vysokosacharidová koncepce — sacharidy jako hlavní palivo pro trénink. Silový trénink je podmínkou. Gainery opatrně — sledovat složení.', tips:['Bílkoviny rovnoměrně rozložit do 4–6 jídel', 'Sacharidy komplexní + jednoduché kolem tréninku', 'Sledovat Ca, Mg, vit. C, E, D, B komplex'] },
+    'maintain':     { name:'Udržení váhy', protein:'1,5 g/kg', carbs:'3–4 g/kg', fat:'0,9 g/kg', approach:'Příjem = TDEE. Smíšená koncepce — pestrost potravin, pravidelnost. Zaměřit se na kvalitu potravin, ne jen na kalorie.', tips:['Pravidelné vážení a korekce', 'Fermentované potraviny pro zdraví mikrobioty', 'Pohybová aktivita udržuje metabolismus'] },
+    'health':       { name:'Zdravé stravování', protein:'1,2 g/kg', carbs:'3 g/kg', fat:'0,8 g/kg', approach:'Zaměřit se na kvalitu potravin (NOVA I–II — minimálně zpracované). Pestrost, barevnost a pravidelnost. Žádné extrémní restrikce.', tips:['Minimálně zpracované potraviny', 'Co nejširší spektrum potravin', 'Sezónní a lokální produkty', 'Fermentované potraviny 1–2x denně'] },
+    'sport_male':   { name:'Sportovec — muž', protein:'1,4–1,7 g/kg (silový sport: +0,2–0,3 g)', carbs:'4–6 g/kg (60 % energie)', fat:'0,9 g/kg (20–30 %)', approach:'+200 kcal nad TDEE. Zaměřit se na načasování sacharidů kolem tréninku — komplexní před, jednoduché po. Sledovat mikrolživiny.', tips:['Ca, Mg, vit. C, E, D, B komplex — zvýšená potřeba', 'Hydratace — klíčová pro výkon', 'Omega-3 z lososa, tuňáka pro regeneraci'] },
+    'sport_female': { name:'Sportovkyně — žena', protein:'1,3–1,5 g/kg', carbs:'4–5 g/kg (60 % energie)', fat:'0,9 g/kg', approach:'+150 kcal nad TDEE. Zvláštní pozornost na Fe (ztráty menstruací 1,5–2 mg), Ca a D3. Minimální % tuku 11–12 %!', tips:['Fe sledovat pravidelně (menstruace = zvýšená ztráta)', 'Ca + D3 pro kosti', 'Omega-3 pro hormonální rovnováhu'] },
+    'other':        { name:'Individuální cíl', protein:'1–1,5 g/kg', carbs:'3–4 g/kg', fat:'0,8–1 g/kg', approach:'Individuálně dle potřeb klienta. Základem je pestrost a kvalita potravin, adekvátní kalorický příjem a pravidelnost.', tips:['Pravidelnost jídel', 'Dostatek vlákniny', 'Kvalita před kvantitou'] },
+  },
+
+  general: {
+    microbiota: ['Fermentované potraviny: jogurt, kefír, kváskový chléb, miso', 'Prebiotika (0,3 g/kg muži, 0,4 g/kg ženy): inulin, FOS, GOS', 'Omezit průmyslově zpracované potraviny a aditiva', 'Dostatek vlákniny: 25–35 g/den'],
+    inflammatory: { anti:['Zelenina', 'Ovoce (přiměřeně)', 'Oleje lisované za studena', 'Mandle', 'Hořká čokoláda (>70 %)', 'Koření (kurkuma, zázvor, česnek)', 'Zelený čaj', 'Houby a klíčky'], pro:['Alkohol', 'Rafinovaný cukr', 'Polotovary a konzervy', 'Uzeniny', 'Přepálené tuky', 'Grilované a smažené'] },
+  }
+};
+
+// ── HLAVNÍ ANALYTICKÁ FUNKCE ──
+function analyzeClient(c, question) {
+  if (!c) return '⚠️ Klient není načten.';
+  const q = question.toLowerCase();
+  const diseases = (c.diseases || '').toLowerCase();
+  const allergies = (c.allergies || '').toLowerCase();
+  const goal = c.goal || 'other';
+  const goalData = RULES.goals[goal] || RULES.goals.other;
+  const w = +c.weight || 70;
+  const age = +c.age || 30;
+
+  // Detekce nemocí
+  const foundDiseases = [];
+  for (const [key, data] of Object.entries(RULES.diseases)) {
+    if (diseases.includes(key)) foundDiseases.push(data);
+  }
+
+  // Detekce alergií
+  const foundAllergies = [];
+  for (const [key, data] of Object.entries(RULES.allergies)) {
+    if (allergies.includes(key)) foundAllergies.push(data);
+  }
+
+  // Detekce tématu otázky
+  const isSuppl      = q.includes('suplem') || q.includes('doplněk') || q.includes('vitamin') || q.includes('minerál') || q.includes('omega');
+  const isAvoid      = q.includes('vylouč') || q.includes('vyhýbat') || q.includes('nevhodn') || q.includes('zakáz') || q.includes('nesmí');
+  const isDisease    = q.includes('nemoc') || q.includes('vliv') || q.includes('diagnóz') || q.includes('chorob');
+  const isApproach   = q.includes('přístup') || q.includes('jídelníček') || q.includes('stravov') || q.includes('dieta') || q.includes('makro');
+  const isWarning    = q.includes('pozor') || q.includes('riziko') || q.includes('kontraind') || q.includes('upozorn') || q.includes('sestavov');
+
+  let response = [];
+
+  // ── Sekce: Upozornění / Na co si dát pozor ──
+  if (isWarning || isDisease || (!isSuppl && !isAvoid && !isApproach)) {
+    response.push(`<strong>⚠️ Klíčová upozornění pro ${c.name} ${c.surname}</strong>`);
+
+    if (foundDiseases.length > 0) {
+      foundDiseases.forEach(d => {
+        response.push(`<br><strong>🏥 ${d.label}:</strong>`);
+        d.warn.forEach(w => response.push(`• ${w}`));
+      });
+    }
+
+    if (foundAllergies.length > 0) {
+      foundAllergies.forEach(a => {
+        response.push(`<br><strong>🚫 ${a.label}:</strong>`);
+        a.warn.forEach(w => response.push(`• ${w}`));
+      });
+    }
+
+    if (foundDiseases.length === 0 && foundAllergies.length === 0) {
+      response.push('• Žádné specifické nemoci ani alergie nejsou evidovány.');
+      response.push('• Základní pravidla platí: pestrost, pravidelnost, kvalita potravin.');
+    }
+  }
+
+  // ── Sekce: Suplementace ──
+  if (isSuppl) {
+    response.push(`<strong>💊 Doporučená suplementace</strong>`);
+
+    const allSuppl = new Set();
+    foundDiseases.forEach(d => (d.suppl || []).forEach(s => allSuppl.add(s)));
+    foundAllergies.forEach(a => (a.suppl || []).forEach(s => allSuppl.add(s)));
+
+    if (allSuppl.size > 0) {
+      response.push('<br><strong>Dle diagnóz / alergií:</strong>');
+      [...allSuppl].forEach(s => response.push(`• ${s}`));
+    }
+
+    // Dle pohlaví
+    if (c.gender === 'F' && (goal === 'sport_female' || goal === 'health' || goal === 'maintain')) {
+      response.push('<br><strong>Žena — zvýšená potřeba:</strong>');
+      response.push('• Železo (organická forma + vit. C pro vstřebávání)');
+      response.push('• Vápník + Vitamín D3');
+      response.push('• Kyselina listová (B9) — zejm. při plánování těhotenství');
+    }
+    if (goal === 'sport_male' || goal === 'sport_female' || goal === 'gain') {
+      response.push('<br><strong>Sportovní podpora:</strong>');
+      response.push('• Hořčík (svalová relaxace, 350–400 mg/den)');
+      response.push('• Vitamín D3 (imunita a výkon)');
+      response.push('• Omega-3 z ryb (regenerace)');
+      response.push('• Vitamín C + E (antioxidační ochrana)');
+    }
+    if (allSuppl.size === 0 && goal !== 'sport_male' && goal !== 'sport_female' && goal !== 'gain') {
+      response.push('• Vitamín D3 (deficit v ČR u 80 % populace, zvl. podzim–zima)');
+      response.push('• Omega-3 (pokud v jídelníčku není 2× týdně ryba)');
+      response.push('• Hořčík (stres, svalové napětí, únava)');
+    }
+    response.push('<br><em>Suplementy brát dle pravidel: tukové s tučným jídlem, Fe dopoledne, Zn ne s mlékem.</em>');
+  }
+
+  // ── Sekce: Co vyloučit ──
+  if (isAvoid) {
+    response.push(`<strong>🚫 Co omezit nebo vyloučit</strong>`);
+
+    const allAvoid = new Set();
+    foundDiseases.forEach(d => (d.avoid || []).forEach(a => allAvoid.add(a)));
+    foundAllergies.forEach(a => (a.avoid || []).forEach(av => allAvoid.add(av)));
+
+    // Prozánětlivé potraviny vždy upozornit
+    response.push('<br><strong>Obecně prozánětlivé (omezit u všech):</strong>');
+    ['Alkohol', 'Rafinovaný cukr a sladkosti', 'Polotovary (NOVA IV.)', 'Přepálené tuky', 'Průmyslové uzeniny'].forEach(a => response.push(`• ${a}`));
+
+    if (allAvoid.size > 0) {
+      response.push('<br><strong>Specificky dle diagnóz a alergií:</strong>');
+      [...allAvoid].forEach(a => response.push(`• ${a}`));
+    }
+  }
+
+  // ── Sekce: Stravovací přístup / Makra ──
+  if (isApproach) {
+    response.push(`<strong>🥗 Stravovací přístup — ${goalData.name}</strong>`);
+    response.push(`<br>${goalData.approach}`);
+    response.push('<br><strong>Doporučená makra:</strong>');
+    response.push(`• Bílkoviny: <strong>${goalData.protein}</strong> → ${Math.round(w * parseFloat(goalData.protein))} g/den`);
+    response.push(`• Sacharidy: <strong>${goalData.carbs}</strong>`);
+    response.push(`• Tuky: <strong>${goalData.fat}</strong>`);
+    response.push('<br><strong>Praktické tipy:</strong>');
+    goalData.tips.forEach(t => response.push(`• ${t}`));
+
+    if (foundDiseases.length > 0) {
+      response.push('<br><strong>⚠️ Úpravy dle diagnóz:</strong>');
+      foundDiseases.slice(0,2).forEach(d => response.push(`• ${d.label}: ${d.warn[0]}`));
+    }
+  }
+
+  // Pokud nic neodpovídá — obecné shrnutí
+  if (response.length === 0) {
+    response.push(`<strong>📋 Přehled pro ${c.name} ${c.surname}</strong>`);
+    response.push(`• Cíl: <strong>${goalData.name}</strong>`);
+    response.push(`• Bílkoviny: ${goalData.protein}`);
+    response.push(`• Sacharidy: ${goalData.carbs}`);
+    response.push(`• Přístup: ${goalData.approach}`);
+    if (foundDiseases.length > 0) {
+      response.push('<br><strong>Evidované diagnózy:</strong>');
+      foundDiseases.forEach(d => response.push(`• ${d.label}`));
+    }
+    if (foundAllergies.length > 0) {
+      response.push('<br><strong>Alergie a intolerance:</strong>');
+      foundAllergies.forEach(a => response.push(`• ${a.label}`));
+    }
+    response.push('<br>Zeptejte se konkrétněji nebo použijte rychlá tlačítka výše.');
+  }
+
+  return response.join('<br>');
+}
+
+function initAiAdvisor(clientId) {
+  const c = clients.find(x => x.id === clientId);
+  aiCurrentClientId = clientId;
+  const msgsEl = document.getElementById('ai-messages');
+
+  let intro = `<strong>Připraven pro: ${c ? c.name+' '+c.surname : 'klient'}</strong><br>`;
+  if (c?.diseases) intro += `⚠️ Eviduji nemoci: <strong>${c.diseases}</strong><br>`;
+  if (c?.allergies) intro += `🚫 Alergie: <strong>${c.allergies}</strong><br>`;
+  intro += 'Na co se chcete zeptat? Použijte tlačítka nebo napište vlastní dotaz.';
+
+  msgsEl.innerHTML = `<div class="ai-msg assistant">
+    <div class="ai-msg-avatar">VV</div>
+    <div class="ai-msg-bubble">${intro}</div>
+  </div>`;
+}
+
+function aiQuick(text) {
+  document.getElementById('ai-input').value = text;
+  sendAiMessage();
+}
+
+function sendAiMessage() {
+  const input = document.getElementById('ai-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  const msgsEl = document.getElementById('ai-messages');
+  msgsEl.innerHTML += `<div class="ai-msg user">
+    <div class="ai-msg-avatar">Já</div>
+    <div class="ai-msg-bubble">${text}</div>
+  </div>`;
+
+  const c = clients.find(x => x.id === aiCurrentClientId);
+  const answer = analyzeClient(c, text);
+
+  setTimeout(() => {
+    msgsEl.innerHTML += `<div class="ai-msg assistant">
+      <div class="ai-msg-avatar">VV</div>
+      <div class="ai-msg-bubble">${answer}</div>
+    </div>`;
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }, 300);
+
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+  input.focus();
+}
+
+</script>
+</body>
+</html>
