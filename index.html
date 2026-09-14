@@ -1086,6 +1086,86 @@
     footer .footer-inner { gap: 16px; }
     .footer-copy { font-size: 12px; }
   }
+
+  /* ── PRÁVNÍ PATIČKA ── */
+  .footer-legal {
+    width: 100%; border-top: 1px solid rgba(255,255,255,0.12);
+    margin-top: 28px; padding-top: 24px;
+    display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+  }
+  .footer-ident { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.8; }
+  .footer-ident strong { color: rgba(255,255,255,0.7); font-weight: 600; }
+  .footer-links { display: flex; flex-direction: column; gap: 7px; }
+  .footer-links a {
+    font-size: 12px; color: rgba(255,255,255,0.5);
+    text-decoration: none; transition: color 0.15s;
+  }
+  .footer-links a:hover { color: #A8C4A0; }
+
+  @media (max-width: 600px) {
+    .footer-legal { flex-direction: column; gap: 20px; }
+  }
+
+  /* ── BOLD REDESIGN ── */
+  .hero-title {
+    font-size: clamp(38px, 6.5vw, 72px) !important;
+    line-height: 1 !important;
+    letter-spacing: -0.035em !important;
+    text-transform: uppercase;
+    font-weight: 700 !important;
+  }
+  .hero-title em { font-style: normal; color: var(--sage); }
+  .hero-sub {
+    font-size: 18px !important;
+    max-width: 620px;
+    color: rgba(28,28,30,0.62) !important;
+  }
+  .section-title {
+    font-size: clamp(32px, 5vw, 52px) !important;
+    line-height: 1.02 !important;
+    letter-spacing: -0.035em !important;
+    text-transform: uppercase;
+  }
+  .section-tag { font-size: 11px; letter-spacing: 0.18em; }
+
+  .tile-name { font-size: clamp(19px, 2.4vw, 24px); letter-spacing: -0.02em; }
+  .tile-price { font-size: 17px; letter-spacing: -0.01em; }
+  .proc-title { font-size: 19px; letter-spacing: -0.02em; }
+
+  .btn-primary, .submit-btn {
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 14px !important;
+    font-weight: 700;
+  }
+
+  /* Mikrotext pod formulářem */
+  .form-micro {
+    font-size: 12px; color: rgba(28,28,30,0.42);
+    line-height: 1.6; margin-top: 14px; text-align: center;
+  }
+  .form-micro a { color: rgba(28,28,30,0.55); text-decoration: underline; }
+
+  /* Minimalistická patička */
+  .footer-legal {
+    width: 100%; border-top: 1px solid rgba(255,255,255,0.10);
+    margin-top: 26px; padding-top: 22px;
+    display: flex; justify-content: space-between; gap: 20px;
+    flex-wrap: wrap; align-items: flex-end;
+  }
+  .footer-ident { font-size: 11.5px; color: rgba(255,255,255,0.38); line-height: 1.75; }
+  .footer-ident strong { color: rgba(255,255,255,0.6); font-weight: 600; }
+  .footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+  .footer-links a {
+    font-size: 11.5px; color: rgba(255,255,255,0.45);
+    text-decoration: none; transition: color 0.15s;
+  }
+  .footer-links a:hover { color: #A8C4A0; }
+
+  @media (max-width: 600px) {
+    .footer-legal { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .form-micro { text-align: left; }
+  }
 </style>
 </head>
 <body>
@@ -1271,37 +1351,22 @@
     <div class="reveal">
       <div class="contact-form-wrap">
         <div class="form-title">Napište mi</div>
-        <form onsubmit="handleSubmit(event)" name="poptavka" data-netlify="true">
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label">Jméno</label>
-              <input class="form-input" id="cf-name" name="jmeno" type="text" placeholder="Jan" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Příjmení</label>
-              <input class="form-input" id="cf-surname" name="prijmeni" type="text" placeholder="Novák" required>
-            </div>
-          </div>
+        <form onsubmit="handleSubmit(event)">
           <div class="form-group">
-            <label class="form-label">E-mail</label>
-            <input class="form-input" id="cf-email" name="email" type="email" placeholder="jan@example.com" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Zájem o</label>
-            <select class="form-select" id="cf-service" name="sluzba">
+            <label class="form-label">Mám zájem o</label>
+            <select class="form-select" id="cf-service" required>
               <option value="" disabled selected>Vyberte službu</option>
-              <!-- Dynamicky doplněno z SERVICES_LIST -->
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Co vás zajímá / čeho chcete dosáhnout</label>
-            <textarea class="form-textarea" id="cf-notes" name="zprava" placeholder="Napište mi cokoliv — klidně i jen pár slov."></textarea>
+            <label class="form-label">Váš e-mail</label>
+            <input class="form-input" id="cf-email" type="email" placeholder="jan@example.com" required>
           </div>
-          <div class="consent-row">
-            <input type="checkbox" id="cf-consent" required>
-            <label for="cf-consent">Souhlasím se zpracováním osobních údajů za účelem vyřízení mé poptávky. Více v <a href="ochrana-osobnich-udaju.html" target="_blank">zásadách ochrany osobních údajů</a>.</label>
-          </div>
-          <button type="submit" class="submit-btn" id="submit-btn">Odeslat zprávu</button>
+          <button type="submit" class="submit-btn" id="submit-btn">Nezávazně poptat</button>
+          <p class="form-micro">
+            Odesláním souhlasíte se <a href="ochrana-osobnich-udaju.html" target="_blank">zpracováním e-mailu</a>
+            pro účely odpovědi. Ozvu se do 24 hodin.
+          </p>
         </form>
       </div>
     </div>
@@ -1329,53 +1394,15 @@
       <div class="footer-links">
         <a href="ochrana-osobnich-udaju.html">Ochrana osobních údajů</a>
         <a href="obchodni-podminky.html">Obchodní podmínky</a>
-        <a href="cookies.html">Zásady cookies</a>
-        <a href="#" onclick="showCookieBanner();return false;">Nastavení cookies</a>
       </div>
     </div>
 
   </div>
 </footer>
 
-<!-- COOKIE LIŠTA -->
-<div class="cookie-banner" id="cookie-banner">
-  <div class="cookie-inner">
-    <div class="cookie-text">
-      Používám pouze technické cookies nezbytné pro fungování webu. Pokud budu v budoucnu používat analytiku,
-      budete moci souhlas kdykoli odvolat. Více v <a href="cookies.html">zásadách cookies</a>.
-    </div>
-    <div class="cookie-actions">
-      <button class="cookie-btn cookie-btn-reject" onclick="setCookieConsent('necessary')">Jen nezbytné</button>
-      <button class="cookie-btn cookie-btn-accept" onclick="setCookieConsent('all')">Přijmout vše</button>
-    </div>
-  </div>
-</div>
 
 <script>
 
-  // ══ COOKIE SOUHLAS ══
-  function setCookieConsent(level) {
-    try {
-      localStorage.setItem('vv_cookie_consent', level);
-      localStorage.setItem('vv_cookie_date', new Date().toISOString());
-    } catch(e) {}
-    document.getElementById('cookie-banner').classList.remove('show');
-  }
-
-  function showCookieBanner() {
-    document.getElementById('cookie-banner').classList.add('show');
-  }
-
-  (function checkCookieConsent() {
-    let consent = null;
-    try { consent = localStorage.getItem('vv_cookie_consent'); } catch(e) {}
-    if (!consent) {
-      setTimeout(() => {
-        const b = document.getElementById('cookie-banner');
-        if (b) b.classList.add('show');
-      }, 1200);
-    }
-  })();
 
   // ══ SEZNAM SLUŽEB — editujte zde ══
   // Propíše se automaticky do bento dlaždic i formuláře
@@ -1479,130 +1506,45 @@
   }
 
 
-  // ══ SKLOŇOVÁNÍ DO 5. PÁDU (vokativ) ══
-  function vokativ(jmeno) {
-    if (!jmeno) return '';
-    const w = jmeno.trim();
-    const l = w.toLowerCase();
-
-    // Výjimky — jména, která se neskloňují nebo mají nepravidelný tvar
-    const vyjimky = {
-      'petr':'Petře', 'pavel':'Pavle', 'karel':'Karle', 'josef':'Josefe',
-      'jakub':'Jakube', 'marek':'Marku', 'filip':'Filipe', 'david':'Davide',
-      'daniel':'Danieli', 'michal':'Michale', 'martin':'Martine', 'jan':'Jane',
-      'tomáš':'Tomáši', 'lukáš':'Lukáši', 'matěj':'Matěji', 'ondřej':'Ondřeji',
-      'václav':'Václave', 'vojtěch':'Vojtěchu', 'jiří':'Jiří', 'štěpán':'Štěpáne',
-      'adam':'Adame', 'šimon':'Šimone', 'antonín':'Antoníne', 'miroslav':'Miroslave',
-      'stanislav':'Stanislave', 'zdeněk':'Zdeňku', 'radek':'Radku', 'roman':'Romane',
-      'ivan':'Ivane', 'aleš':'Aleši', 'milan':'Milane', 'vladimír':'Vladimíre',
-      'jaroslav':'Jaroslave', 'rudolf':'Rudolfe', 'oldřich':'Oldřichu',
-      'anna':'Anno', 'eva':'Evo', 'jana':'Jano', 'marie':'Marie', 'lucie':'Lucie',
-      'tereza':'Terezo', 'petra':'Petro', 'veronika':'Veroniko', 'kateřina':'Kateřino',
-      'barbora':'Barboro', 'markéta':'Markéto', 'michaela':'Michaelo', 'martina':'Martino',
-      'hana':'Hano', 'lenka':'Lenko', 'alena':'Aleno', 'zuzana':'Zuzano',
-      'kristýna':'Kristýno', 'natálie':'Natálie', 'adéla':'Adélo', 'klára':'Kláro',
-      'nikola':'Nikolo', 'simona':'Simono', 'monika':'Moniko', 'denisa':'Deniso',
-      'karolína':'Karolíno', 'sofie':'Sofie', 'eliška':'Eliško', 'anežka':'Anežko',
-      'jitka':'Jitko', 'ivana':'Ivano', 'irena':'Ireno', 'radka':'Radko',
-    };
-    if (vyjimky[l]) return vyjimky[l];
-
-    const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-
-    // ŽENSKÁ JMÉNA
-    if (l.endsWith('a')) {
-      // Nováková → Nováková (příjmení na -ová se neskloňují ve vokativu jinak)
-      if (l.endsWith('ová')) return w;
-      // -ka → -ko, -na → -no, -la → -lo atd.
-      return cap(w.slice(0, -1) + 'o');
-    }
-    if (l.endsWith('e') || l.endsWith('ie')) return w; // Marie, Lucie
-    if (l.endsWith('ost') || l.endsWith('ie')) return w;
-
-    // MUŽSKÁ JMÉNA — koncovky
-    if (l.endsWith('ek')) return cap(w.slice(0, -2) + 'ku');      // Marek → Marku
-    if (l.endsWith('el')) return cap(w.slice(0, -2) + 'le');      // Pavel → Pavle
-    if (l.endsWith('r'))  return cap(w + 'e');                     // Petr → Petre (výjimka výše)
-    if (l.endsWith('ch')) return cap(w + 'u');                     // Vojtěch → Vojtěchu
-    if (l.endsWith('k') || l.endsWith('g') || l.endsWith('h')) return cap(w + 'u');
-    if (l.endsWith('š') || l.endsWith('č') || l.endsWith('ž') || l.endsWith('ř') || l.endsWith('j') || l.endsWith('ď') || l.endsWith('ť') || l.endsWith('ň')) return cap(w + 'i');
-    if (l.endsWith('c')) return cap(w + 'i');
-    if (l.endsWith('í') || l.endsWith('ý')) return w;              // Jiří, Nový
-    if (l.endsWith('a') || l.endsWith('o') || l.endsWith('u')) return w;
-
-    // Standardní tvrdá koncovka → +e
-    return cap(w + 'e');
-  }
-
-  function vokativCele(jmeno, prijmeni) {
-    const j = vokativ(jmeno);
-    const p = prijmeni ? vokativ(prijmeni) : '';
-    return p ? `${j} ${p}` : j;
-  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     const btn     = document.getElementById('submit-btn');
-    const name    = document.getElementById('cf-name').value.trim();
-    const surname = document.getElementById('cf-surname').value.trim();
     const email   = document.getElementById('cf-email').value.trim();
-    const service = document.getElementById('cf-service').value || 'Neuvedeno';
-    const notes   = document.getElementById('cf-notes').value.trim();
+    const service = document.getElementById('cf-service').value;
 
     btn.textContent = 'Odesílám…';
     btn.disabled = true;
 
-    const SB_URL = 'https://tgthwepwelukrdyjfwsd.supabase.co';
-    const SB_KEY = 'sb_publishable_gk7PtV1JC7GTf3TC2S4roQ_3ul03xHb';
-    const sb = supabase.createClient(SB_URL, SB_KEY);
+    const sb = supabase.createClient(
+      'https://tgthwepwelukrdyjfwsd.supabase.co',
+      'sb_publishable_gk7PtV1JC7GTf3TC2S4roQ_3ul03xHb'
+    );
 
-    // 1) Uložit do Supabase
     const { error: dbErr } = await sb.from('clients').insert([{
-      name, surname, email, service, notes, status: 'new'
+      name: email.split('@')[0], surname: '', email, service, notes: '', status: 'new'
     }]);
 
-    // 2) Odeslat emailové oznámení přes EmailJS
     try {
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        from_name:  name + ' ' + surname,
-        from_email: email,
-        service:    service,
-        message:    notes || '(bez zprávy)',
-        reply_to:   email,
+        from_name: email, from_email: email, service, message: '(poptávka z webu)', reply_to: email,
       });
-      console.log('✓ Email odeslán');
-
-      // Potvrzovací email klientovi
       if (!EMAILJS_TEMPLATE_CONFIRM.includes('VÁŠ')) {
         await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CONFIRM, {
-          client_name:  vokativCele(name, surname),
-          client_email: email,
-          reply_to:     'vojtechvolejnik@gmail.com',
+          client_name: '', client_email: email, reply_to: 'vojtechvolejnik@gmail.com',
         });
-        console.log('✓ Potvrzovací email odeslán klientovi');
       }
-    } catch(emailErr) {
-      console.error('Email error:', emailErr);
-    }
+    } catch(err) { console.error('Email error:', err); }
 
     if (dbErr) {
       console.error(dbErr);
-      btn.textContent = '⚠️ Chyba, zkuste znovu';
+      btn.textContent = 'Chyba, zkuste znovu';
       btn.style.background = '#C0392B';
-      setTimeout(() => {
-        btn.textContent = 'Odeslat zprávu';
-        btn.style.background = '';
-        btn.disabled = false;
-      }, 3000);
+      setTimeout(() => { btn.textContent='Nezávazně poptat'; btn.style.background=''; btn.disabled=false; }, 3000);
     } else {
-      btn.textContent = '✓ Zpráva odeslána!';
-      btn.style.background = '#5A6E63';
-      setTimeout(() => {
-        btn.textContent = 'Odeslat zprávu';
-        btn.style.background = '';
-        btn.disabled = false;
-        e.target.reset();
-      }, 3500);
+      btn.textContent = '✓ Odesláno — ozvu se vám';
+      btn.style.background = '#3A4D2C';
+      setTimeout(() => { btn.textContent='Nezávazně poptat'; btn.style.background=''; btn.disabled=false; e.target.reset(); }, 4000);
     }
   }
 

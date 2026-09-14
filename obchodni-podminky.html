@@ -12,36 +12,41 @@
   :root{--cream:#FAFAF9;--sage:#4A5E3A;--sage-dark:#3A4D2C;--peach:#E8F0E0;
         --terra:#1C1C1E;--white:#FFFFFF;--border:#E0DDD8;--sans:'DM Sans',system-ui,sans-serif}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--sans);background:var(--white);color:var(--terra);font-size:16px;line-height:1.7}
+  body{font-family:var(--sans);background:var(--white);color:var(--terra);font-size:15px;line-height:1.75}
   nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
       padding:0 40px;height:68px;background:var(--white);border-bottom:1px solid var(--border)}
   .nav-logo{font-size:17px;font-weight:700;letter-spacing:-0.01em;color:var(--terra);text-decoration:none}
   .nav-back{font-size:14px;color:var(--sage);text-decoration:none;font-weight:600}
   .nav-back:hover{color:var(--sage-dark)}
   main{max-width:760px;margin:0 auto;padding:64px 24px 96px}
-  .doc-tag{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);margin-bottom:12px}
-  h1{font-size:38px;font-weight:700;letter-spacing:-0.02em;line-height:1.15;margin-bottom:14px}
-  .doc-date{font-size:14px;color:rgba(28,28,30,.45);margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--border)}
-  h2{font-size:21px;font-weight:700;letter-spacing:-0.01em;margin:40px 0 14px}
-  h3{font-size:16px;font-weight:700;margin:26px 0 8px;color:var(--sage-dark)}
-  p{margin-bottom:14px;color:rgba(28,28,30,.78)}
-  ul,ol{margin:0 0 16px 22px;color:rgba(28,28,30,.78)}
-  li{margin-bottom:7px}
+  .doc-tag{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--sage);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,44px);font-weight:700;letter-spacing:-0.03em;line-height:1.05;
+     text-transform:uppercase;margin-bottom:14px}
+  .doc-date{font-size:13px;color:rgba(28,28,30,.45);margin-bottom:36px;padding-bottom:22px;border-bottom:1px solid var(--border)}
+  .intro{font-size:15px;color:rgba(28,28,30,.72);margin-bottom:8px}
+  h2{font-size:16px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;
+     margin:44px 0 16px;padding-bottom:9px;border-bottom:2px solid var(--sage);color:var(--terra)}
+  p{margin-bottom:11px;color:rgba(28,28,30,.78)}
+  .cl{display:flex;gap:12px;margin-bottom:11px}
+  .cl-num{flex-shrink:0;font-weight:700;color:var(--sage);font-size:14px;min-width:34px;padding-top:1px}
+  .cl-txt{color:rgba(28,28,30,.78)}
+  ul{margin:8px 0 12px 20px;color:rgba(28,28,30,.78)}
+  li{margin-bottom:6px}
   strong{font-weight:700;color:var(--terra)}
   a{color:var(--sage)}
-  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
-  th{background:var(--cream);text-align:left;padding:11px 14px;font-weight:700;font-size:13px;border:1px solid var(--border)}
-  td{padding:11px 14px;border:1px solid var(--border);color:rgba(28,28,30,.78)}
-  .note{background:var(--peach);border-left:3px solid var(--sage);padding:16px 20px;margin:22px 0;font-size:14px;border-radius:0 8px 8px 0}
-  .crit{background:#FEE2E2;border-left:3px solid #DC2626;padding:16px 20px;margin:22px 0;font-size:14px;border-radius:0 8px 8px 0;color:#7F1D1D}
+  .note{background:var(--peach);border-left:3px solid var(--sage);padding:16px 20px;margin:20px 0;
+        font-size:14px;border-radius:0 8px 8px 0}
+  .crit{background:#FEF2F2;border-left:3px solid #DC2626;padding:16px 20px;margin:20px 0;
+        font-size:14px;border-radius:0 8px 8px 0;color:#7F1D1D}
+  .crit strong{color:#7F1D1D}
   footer{background:#1C2A16;padding:32px 40px;margin-top:64px}
   .footer-inner{max-width:760px;margin:0 auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
-                font-size:13px;color:rgba(255,255,255,.5)}
-  .footer-inner a{color:rgba(255,255,255,.5);text-decoration:none}
+                font-size:12px;color:rgba(255,255,255,.45)}
+  .footer-inner a{color:rgba(255,255,255,.45);text-decoration:none}
   .footer-inner a:hover{color:#A8C4A0}
   @media(max-width:600px){
-    nav{padding:0 18px}main{padding:44px 18px 64px}h1{font-size:30px}h2{font-size:19px}
-    footer{padding:28px 18px}table{font-size:13px}th,td{padding:9px 10px}
+    nav{padding:0 18px}main{padding:44px 18px 64px}
+    footer{padding:28px 18px}.cl{gap:9px}.cl-num{min-width:30px;font-size:13px}
   }
 </style>
 </head>
@@ -54,189 +59,299 @@
 
 <main>
   <div class="doc-tag">Právní dokument</div>
-  <h1>Obchodní podmínky</h1>
-  <p class="doc-date">Účinné od: 11. 9. 2026 &nbsp;·&nbsp; Verze 1.0</p>
+  <h1>Všeobecné obchodní podmínky</h1>
+  <p class="doc-date">Účinné od 14. 9. 2026 &nbsp;·&nbsp; Verze 1.0</p>
 
-  <h2>1. Základní údaje</h2>
-  <p>Tyto obchodní podmínky upravují vztah mezi poskytovatelem a klientem při poskytování služeb výživového poradenství.</p>
-  <p><strong>Poskytovatel:</strong></p>
-  <ul>
-    <li>Vojtěch Volejník</li>
-    <li>IČO: <strong>23705183</strong></li>
-    <li>Sídlo: <strong>Pátek 166, 290 01 Pátek</strong></li>
-    <li>E-mail: <a href="mailto:vojtechvolejnik@gmail.com">vojtechvolejnik@gmail.com</a>, tel. +420 774 644 496</li>
-    <li>Fyzická osoba zapsaná v živnostenském rejstříku, nejsem plátcem DPH</li>
-  </ul>
-  <p>
-    <strong>Klientem</strong> je fyzická osoba, která si objedná některou z nabízených služeb.
-    Klient musí být <strong>starší 18 let</strong>. Osobám mladším 18 let poskytuji služby pouze
-    se souhlasem zákonného zástupce.
+  <p class="intro">
+    Tyto všeobecné obchodní podmínky (dále jen <strong>„VOP“</strong>) upravují v souladu
+    s ustanovením § 1751 zákona č. 89/2012 Sb., občanský zákoník, ve znění pozdějších předpisů
+    (dále jen <strong>„OZ“</strong>), vzájemná práva a povinnosti smluvních stran vzniklé
+    v souvislosti s poskytováním služeb výživového poradenství.
   </p>
 
-  <h2>2. Nabízené služby</h2>
-  <p>Aktuální nabídka a ceny jsou uvedeny na <a href="index.html#sluzby">webových stránkách</a>. Služby zahrnují zejména:</p>
-  <ul>
-    <li>Online konzultace v oblasti výživy</li>
-    <li>Analýzu stravovacího deníku a sestavení vzorového jídelníčku</li>
-    <li>Dlouhodobou spolupráci s průběžnou podporou</li>
-    <li>Doporučení v oblasti suplementace</li>
-    <li>Digitální produkty (e-booky)</li>
-  </ul>
+  <h2>1. Smluvní strany a základní ustanovení</h2>
+
+  <div class="cl"><div class="cl-num">1.1</div><div class="cl-txt">
+    <strong>Poskytovatelem</strong> je Vojtěch Volejník, IČO 23705183, se sídlem č.p. 166,
+    290 01 Pátek, fyzická osoba zapsaná v živnostenském rejstříku. Poskytovatel není plátcem DPH.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">1.2</div><div class="cl-txt">
+    Kontaktní údaje: e-mail <a href="mailto:vojtechvolejnik@gmail.com">vojtechvolejnik@gmail.com</a>,
+    telefon +420 774 644 496.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">1.3</div><div class="cl-txt">
+    <strong>Klientem</strong> je fyzická osoba, která si objedná některou ze služeb poskytovatele.
+    Je-li klient spotřebitelem ve smyslu § 419 OZ, vztahuje se na něj zvýšená ochrana podle
+    zákona č. 634/1992 Sb., o ochraně spotřebitele.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">1.4</div><div class="cl-txt">
+    Klient musí být starší 18 let. U nezletilého klienta je poskytovatel oprávněn požadovat
+    písemný souhlas zákonného zástupce s poskytováním služeb.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">1.5</div><div class="cl-txt">
+    Znění VOP může poskytovatel měnit či doplňovat. Pro již uzavřené smlouvy platí znění
+    účinné ke dni uzavření smlouvy.
+  </div></div>
+
+  <h2>2. Povaha poskytovaných služeb</h2>
+
+  <div class="cl"><div class="cl-num">2.1</div><div class="cl-txt">
+    Poskytovatel poskytuje služby v oblasti výživového poradenství a poradenství v oblasti
+    suplementace — zejména analýzu stravovacích návyků, sestavení individuálních výživových
+    doporučení a stravovacích plánů, konzultace a edukační materiály.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">2.2</div><div class="cl-txt">
+    Aktuální nabídka služeb, jejich obsah a ceny jsou uvedeny na
+    <a href="index.html#sluzby">webových stránkách poskytovatele</a>. Popis u každé služby
+    závazně vymezuje, co konkrétně klient obdrží.
+  </div></div>
 
   <div class="crit">
-    <strong>Důležité upozornění</strong><br>
-    Nejsem lékař ani zdravotnický pracovník. Poskytované poradenství <strong>nenahrazuje lékařskou
-    péči, diagnostiku ani léčbu</strong>. Pokud trpíte onemocněním, užíváte léky nebo jste těhotná,
-    konzultujte změny stravy se svým lékařem. V akutních zdravotních potížích se obraťte na lékaře,
-    nikoli na výživového poradce.
+    <strong>2.3 — Služby nejsou zdravotními službami</strong><br><br>
+    Služby poskytovatele <strong>nejsou zdravotními službami (zdravotní péčí)</strong> ve smyslu
+    zákona č. 372/2011 Sb., o zdravotních službách, ani specifickými zdravotními službami
+    ve smyslu zákona č. 373/2011 Sb. Poskytovatel není lékařem ani zdravotnickým pracovníkem
+    a poskytované poradenství <strong>nenahrazuje lékařskou péči, diagnostiku ani léčbu</strong>.
   </div>
 
+  <div class="cl"><div class="cl-num">2.4</div><div class="cl-txt">
+    Vyžaduje-li zdravotní stav klienta zvláštní výživový režim, je-li klient omezen v užívání
+    určitého druhu výživy, užívá-li léky, je těhotný nebo kojící, je <strong>povinen se předem
+    poradit se svým lékařem</strong> a o těchto skutečnostech poskytovatele informovat.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">2.5</div><div class="cl-txt">
+    V akutních zdravotních potížích je klient povinen obrátit se na lékaře, nikoli na poskytovatele.
+  </div></div>
+
   <h2>3. Objednávka a uzavření smlouvy</h2>
-  <ol>
-    <li>Klient odešle poptávku přes kontaktní formulář, e-mail nebo telefonicky.</li>
-    <li>Poskytovatel se ozve zpravidla do 2 pracovních dnů a navrhne formu spolupráce.</li>
-    <li>Smlouva je uzavřena okamžikem, kdy klient potvrdí objednávku a poskytovatel ji přijme.</li>
-    <li>Potvrzení objednávky e-mailem se považuje za uzavření smlouvy na dálku.</li>
-  </ol>
+
+  <div class="cl"><div class="cl-num">3.1</div><div class="cl-txt">
+    Klient projeví zájem o službu prostřednictvím kontaktního formuláře na webových stránkách,
+    e-mailem nebo telefonicky. Odeslání poptávky není objednávkou ani návrhem na uzavření smlouvy.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">3.2</div><div class="cl-txt">
+    Poskytovatel klienta zpravidla do 2 pracovních dnů kontaktuje, upřesní rozsah služby,
+    cenu a termín plnění.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">3.3</div><div class="cl-txt">
+    <strong>Smlouva o poskytování služeb je uzavřena</strong> okamžikem, kdy klient závazně
+    potvrdí objednávku a poskytovatel její přijetí potvrdí. Potvrzení e-mailem je pro tyto
+    účely dostačující a považuje se za uzavření smlouvy na dálku.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">3.4</div><div class="cl-txt">
+    Smlouvu tvoří objednávka klienta, její přijetí poskytovatelem a tyto VOP. Smlouva se uzavírá
+    v českém jazyce, poskytovatel ji archivuje v elektronické podobě a není třetím osobám přístupná.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">3.5</div><div class="cl-txt">
+    Poskytovatel není povinen objednávku přijmout, zejména pokud klient v minulosti neplnil své
+    povinnosti, má-li poskytovatel pochybnosti o vážném zájmu klienta, nebo požaduje-li klient
+    služby mimo nabídku poskytovatele či v rozporu s odbornými zásadami.
+  </div></div>
 
   <h2>4. Cena a platební podmínky</h2>
-  <ul>
-    <li>Ceny jsou uvedeny v Kč a jsou konečné. Poskytovatel <strong>není plátcem DPH</strong>.</li>
-    <li>Na každou objednanou službu vystavím <strong>fakturu</strong> se splatností <strong>7 dnů</strong>,
-        není-li dohodnuto jinak.</li>
-    <li>Faktura je splatná <strong>bankovním převodem</strong> na účet uvedený na faktuře, nebo
-        <strong>v hotovosti</strong> při osobním setkání. Při platbě v hotovosti vystavím příjmový
-        pokladní doklad.</li>
-    <li>Služba je zahájena po připsání platby, resp. po jejím převzetí v hotovosti.</li>
-    <li>U dlouhodobých programů lze po dohodě sjednat úhradu ve splátkách.</li>
-    <li>V případě prodlení s platbou si vyhrazuji právo pozastavit poskytování služby
-        až do jejího uhrazení.</li>
-  </ul>
 
-  <h2>5. Dodání služby</h2>
-  <table>
-    <tr><th>Služba</th><th>Forma dodání</th><th>Lhůta</th></tr>
-    <tr><td>Online konzultace</td><td>Video hovor nebo telefon</td><td>Dle domluveného termínu</td></tr>
-    <tr><td>Analýza a jídelníček</td><td>PDF e-mailem</td><td>Do 5 pracovních dnů od dodání podkladů</td></tr>
-    <tr><td>Měsíční a delší programy</td><td>Průběžně, e-mail a WhatsApp</td><td>Po celou dobu programu</td></tr>
-    <tr><td>E-booky</td><td>PDF e-mailem</td><td>Do 24 hodin od platby</td></tr>
-  </table>
-  <p>
-    Podmínkou dodání je, že klient poskytne úplné a pravdivé podklady (vstupní dotazník, stravovací deník).
-    Pokud tak neučiní, lhůty se prodlužují o dobu prodlení.
-  </p>
+  <div class="cl"><div class="cl-num">4.1</div><div class="cl-txt">
+    Ceny služeb jsou uvedeny v českých korunách a jsou konečné. Poskytovatel není plátcem DPH.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">4.2</div><div class="cl-txt">
+    Na objednanou službu vystaví poskytovatel <strong>fakturu se splatností 7 dnů</strong>,
+    není-li dohodnuto jinak.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">4.3</div><div class="cl-txt">
+    Cenu lze uhradit <strong>bankovním převodem</strong> na účet uvedený na faktuře nebo
+    <strong>v hotovosti</strong> při osobním setkání. Při platbě v hotovosti vystaví poskytovatel
+    příjmový pokladní doklad.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">4.4</div><div class="cl-txt">
+    Poskytování služby je zahájeno po připsání platby na účet, resp. po převzetí hotovosti.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">4.5</div><div class="cl-txt">
+    U dlouhodobých programů lze po dohodě sjednat úhradu ve splátkách. V případě prodlení
+    s úhradou je poskytovatel oprávněn poskytování služby pozastavit až do jejího uhrazení.
+  </div></div>
+
+  <h2>5. Poskytnutí služby a součinnost klienta</h2>
+
+  <div class="cl"><div class="cl-num">5.1</div><div class="cl-txt">
+    Rozsah, forma a lhůta dodání každé služby jsou vymezeny v jejím popisu na webových stránkách
+    a upřesněny při potvrzení objednávky.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">5.2</div><div class="cl-txt">
+    Konzultace probíhají online formou video hovoru nebo telefonicky, není-li dohodnuto jinak.
+    Písemné výstupy poskytovatel zasílá elektronicky na e-mail klienta.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">5.3</div><div class="cl-txt">
+    Klient je povinen <strong>poskytnout úplné a pravdivé informace</strong> potřebné k poskytnutí
+    služby, zejména o svém zdravotním stavu, alergiích, intolerancích, užívaných lécích
+    a doplňcích stravy, a nic podstatného nezatajovat.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">5.4</div><div class="cl-txt">
+    Neposkytne-li klient potřebnou součinnost (nevyplní vstupní dotazník, nedodá stravovací
+    deník), lhůty pro dodání se prodlužují o dobu jeho prodlení.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">5.5</div><div class="cl-txt">
+    <strong>Zrušení sjednaného termínu:</strong> zruší-li klient termín více než 24 hodin předem,
+    bude přesunut bez poplatku. Při zrušení méně než 24 hodin předem nebo při nedostavení se
+    termín propadá a cena se nevrací; ve výjimečných případech lze po dohodě termín přesunout.
+    Zruší-li termín poskytovatel, nabídne náhradní termín nebo vrátí poměrnou část ceny.
+  </div></div>
 
   <h2>6. Odstoupení od smlouvy</h2>
 
-  <h3>6.1 Zákonné právo na odstoupení</h3>
-  <p>
-    Jako spotřebitel máte právo odstoupit od smlouvy uzavřené na dálku <strong>do 14 dnů</strong>
-    bez udání důvodu. Odstoupení stačí poslat e-mailem na vojtechvolejnik@gmail.com.
-  </p>
+  <div class="cl"><div class="cl-num">6.1</div><div class="cl-txt">
+    Je-li klient spotřebitelem, má právo odstoupit od smlouvy uzavřené na dálku
+    <strong>do 14 dnů</strong> ode dne jejího uzavření, bez udání důvodu. Odstoupení postačí
+    zaslat e-mailem na vojtechvolejnik@gmail.com.
+  </div></div>
 
-  <h3>6.2 Zahájení plnění před uplynutím lhůty</h3>
   <div class="note">
-    Pokud si přejete, abych začal pracovat <strong>dříve než uplyne 14denní lhůta</strong> (což je
-    u výživového poradenství obvyklé), musíte s tím výslovně souhlasit. Souhlas potvrdíte
-    v objednávce nebo e-mailem.<br><br>
-    V takovém případě platí: odstoupíte-li během lhůty, uhradíte poměrnou část ceny odpovídající
-    již poskytnutému plnění. Bylo-li plnění dokončeno v plném rozsahu, právo na odstoupení zaniká.
+    <strong>6.2 — Zahájení plnění před uplynutím lhůty</strong><br><br>
+    Požaduje-li klient zahájení poskytování služby před uplynutím 14denní lhůty, musí s tím
+    <strong>výslovně souhlasit</strong> a potvrdit, že byl poučen o následcích. Odstoupí-li poté
+    od smlouvy, uhradí poměrnou část ceny odpovídající rozsahu již poskytnutého plnění.
+    Bylo-li plnění poskytnuto v plném rozsahu, právo na odstoupení podle čl. 6.1 zaniká.
   </div>
 
-  <h3>6.3 Digitální obsah (e-booky)</h3>
-  <p>
-    U e-booků a jiného digitálního obsahu dodaného okamžitě po zaplacení právo na odstoupení
-    <strong>zaniká okamžikem stažení</strong>, pokud s tím klient předem výslovně souhlasil.
-  </p>
+  <div class="cl"><div class="cl-num">6.3</div><div class="cl-txt">
+    U digitálního obsahu dodaného elektronicky (e-booky, PDF materiály) zaniká právo na odstoupení
+    okamžikem jeho zpřístupnění, pokud s tím klient předem výslovně souhlasil a byl poučen
+    o zániku tohoto práva.
+  </div></div>
 
-  <h3>6.4 Zrušení konzultace</h3>
-  <ul>
-    <li>Zrušení <strong>více než 24 hodin</strong> předem — termín přesunu bez poplatku.</li>
-    <li>Zrušení <strong>méně než 24 hodin</strong> předem nebo nedostavení se — konzultace propadá,
-        cena se nevrací. Ve výjimečných případech (nemoc, nehoda) lze po dohodě přesunout.</li>
-    <li>Zruší-li termín poskytovatel, nabídne náhradní termín nebo vrátí peníze.</li>
-  </ul>
+  <div class="cl"><div class="cl-num">6.4</div><div class="cl-txt">
+    Poskytovatel je oprávněn od smlouvy odstoupit, poruší-li klient podstatným způsobem své
+    povinnosti, zejména uvedl-li nepravdivé informace o svém zdravotním stavu nebo je-li
+    v prodlení s úhradou déle než 14 dnů.
+  </div></div>
 
   <h2>7. Odpovědnost za vady a reklamace</h2>
 
-  <h3>7.1 Kdy má služba vadu</h3>
-  <p>
-    Služba má vadu, pokud <strong>neodpovídá tomu, co bylo ujednáno</strong> — například nebyla
-    dodána vůbec, byla dodána v jiném rozsahu, než bylo domluveno, nebo obsahuje zjevnou chybu
-    (například potravinu, na kterou klient uvedl alergii).
-  </p>
+  <div class="cl"><div class="cl-num">7.1</div><div class="cl-txt">
+    Služba má vadu, neodpovídá-li ujednanému rozsahu — například nebyla dodána vůbec,
+    byla dodána v jiném rozsahu, než bylo sjednáno, nebo obsahuje zjevnou chybu.
+  </div></div>
 
   <div class="note">
-    <strong>Co vadou není:</strong> nedosažení konkrétního výsledku. Poskytuji službu s odbornou péčí
-    na základě absolvovaného kurzu výživového poradenství a dostupných odborných poznatků, ale
-    <strong>negarantuji konkrétní výsledek</strong> — ten závisí na dodržování doporučení,
-    individuálních dispozicích a dalších faktorech mimo mou kontrolu.
+    <strong>7.2 — Co vadou není</strong><br><br>
+    Poskytovatel poskytuje služby s odbornou péčí na základě absolvovaného kurzu výživového
+    poradenství a dostupných odborných poznatků, avšak <strong>negarantuje dosažení konkrétního
+    výsledku</strong>. Výsledek závisí na dodržování doporučení, individuálních dispozicích klienta
+    a dalších faktorech mimo kontrolu poskytovatele. Nedosažení očekávaného výsledku není vadou služby.
   </div>
 
-  <h3>7.2 Jak reklamaci uplatnit</h3>
-  <ol>
-    <li>Reklamaci uplatněte <strong>e-mailem</strong> na vojtechvolejnik@gmail.com
-        bez zbytečného odkladu poté, co jste vadu zjistili.</li>
-    <li>Popište, v čem vadu spatřujete, a co požadujete (přepracování, doplnění, slevu).</li>
-    <li>Přijetí reklamace vám písemně potvrdím.</li>
-  </ol>
+  <div class="cl"><div class="cl-num">7.3</div><div class="cl-txt">
+    Reklamaci klient uplatní <strong>e-mailem</strong> bez zbytečného odkladu poté, co vadu zjistil.
+    V reklamaci popíše, v čem vadu spatřuje, a uvede požadovaný způsob vyřízení.
+  </div></div>
 
-  <h3>7.3 Lhůty a vyřízení</h3>
-  <ul>
-    <li>Reklamaci vyřídím <strong>nejpozději do 30 dnů</strong> od jejího uplatnění a o výsledku vás
-        písemně vyrozumím.</li>
-    <li>Delší lhůtu lze sjednat pouze <strong>výslovnou dohodou</strong> v konkrétním případě.</li>
-    <li>Nevyřídím-li oprávněnou reklamaci ve lhůtě, máte právo <strong>odstoupit od smlouvy</strong>
-        a žádat vrácení zaplacené ceny, nebo požadovat přiměřenou slevu.</li>
-    <li>Vyřízení reklamace je bezplatné.</li>
-  </ul>
+  <div class="cl"><div class="cl-num">7.4</div><div class="cl-txt">
+    Poskytovatel přijetí reklamace písemně potvrdí a <strong>vyřídí ji nejpozději do 30 dnů</strong>
+    od jejího uplatnění, přičemž o výsledku klienta písemně vyrozumí. Delší lhůtu lze sjednat
+    pouze výslovnou dohodou.
+  </div></div>
 
-  <h3>7.4 Za co neodpovídám</h3>
-  <ul>
-    <li>Následky nepravdivých nebo neúplných informací poskytnutých klientem — zejména neuvedení
-        alergií, intolerancí nebo onemocnění</li>
-    <li>Následky nedodržení doporučení nebo svévolných úprav plánu</li>
-    <li>Kombinaci mých doporučení s postupy jiných poradců bez mého vědomí</li>
-    <li>Zdravotní komplikace, které nesouvisejí s poskytnutou službou</li>
-  </ul>
+  <div class="cl"><div class="cl-num">7.5</div><div class="cl-txt">
+    Nevyřídí-li poskytovatel oprávněnou reklamaci ve lhůtě podle čl. 7.4, může klient odstoupit
+    od smlouvy a požadovat vrácení zaplacené ceny, nebo požadovat přiměřenou slevu.
+    Vyřízení reklamace je bezplatné.
+  </div></div>
 
-  <h2>8. Ochrana osobních údajů</h2>
-  <p>
+  <h2>8. Omezení odpovědnosti</h2>
+
+  <div class="cl"><div class="cl-num">8.1</div><div class="cl-txt">
+    Poskytovatel <strong>neodpovídá za zdravotní komplikace a jejich následky</strong>, které
+    jsou nebo mohou být způsobeny tím, že klient nevyhledal lékařskou péči v situaci,
+    kdy to bylo vhodné nebo kdy mu to poskytovatel doporučil.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">8.2</div><div class="cl-txt">
+    Poskytovatel neodpovídá za následky nepravdivých, neúplných nebo zatajených informací
+    poskytnutých klientem, zejména neuvedení alergií, intolerancí či onemocnění.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">8.3</div><div class="cl-txt">
+    Poskytovatel neodpovídá za následky nedodržení doporučení, svévolných úprav plánu klientem,
+    ani za kombinaci svých doporučení s postupy jiných poradců bez svého vědomí.
+  </div></div>
+
+  <h2>9. Ochrana osobních údajů</h2>
+
+  <div class="cl"><div class="cl-num">9.1</div><div class="cl-txt">
     Zpracování osobních údajů se řídí <a href="ochrana-osobnich-udaju.html">zásadami ochrany
-    osobních údajů</a>. Údaje o zdravotním stavu zpracovávám pouze na základě výslovného souhlasu.
-  </p>
+    osobních údajů</a>, které tvoří nedílnou součást těchto VOP.
+  </div></div>
 
-  <h2>9. Autorská práva</h2>
-  <p>
-    Všechny materiály (jídelníčky, analýzy, e-booky, PDF dokumenty) jsou autorským dílem.
-    Klient je smí užívat <strong>pro vlastní potřebu</strong>. Šíření, kopírování, prodej
-    nebo zveřejňování bez písemného souhlasu není dovoleno.
-  </p>
+  <div class="cl"><div class="cl-num">9.2</div><div class="cl-txt">
+    Údaje o zdravotním stavu zpracovává poskytovatel výhradně na základě výslovného souhlasu
+    klienta uděleného ve vstupním dotazníku a pouze v rozsahu nezbytném pro poskytnutí služby.
+  </div></div>
 
-  <h2>10. Mimosoudní řešení sporů</h2>
+  <h2>10. Autorská práva</h2>
+
+  <div class="cl"><div class="cl-num">10.1</div><div class="cl-txt">
+    Veškeré materiály předané klientovi (stravovací plány, analýzy, e-booky, PDF dokumenty)
+    jsou autorským dílem poskytovatele chráněným zákonem č. 121/2000 Sb., autorský zákon.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">10.2</div><div class="cl-txt">
+    Klient je oprávněn užívat materiály <strong>výhradně pro svou osobní potřebu</strong>.
+    Jejich šíření, kopírování, zpřístupňování třetím osobám, prodej ani zveřejňování
+    bez písemného souhlasu poskytovatele není dovoleno.
+  </div></div>
+
+  <h2>11. Mimosoudní řešení sporů</h2>
+
   <div class="note">
-    <strong>Česká obchodní inspekce</strong><br>
-    Pokud se nepodaří spor vyřešit dohodou, máte jako spotřebitel právo obrátit se na subjekt
+    <strong>Česká obchodní inspekce</strong><br><br>
+    Nedojde-li ke smírnému vyřešení sporu, má klient jako spotřebitel právo obrátit se na subjekt
     mimosoudního řešení spotřebitelských sporů:<br><br>
     Česká obchodní inspekce, Ústřední inspektorát — oddělení ADR<br>
     Gorazdova 1969/24, 120 00 Praha 2<br>
     <a href="https://adr.coi.cz" target="_blank" rel="noopener">adr.coi.cz</a> &nbsp;·&nbsp;
     <a href="https://www.coi.cz" target="_blank" rel="noopener">www.coi.cz</a><br><br>
-    Řízení lze zahájit do 1 roku od prvního uplatnění reklamace. Je bezplatné.
+    Návrh lze podat do 1 roku ode dne, kdy klient uplatnil své právo poprvé. Řízení je bezplatné.
   </div>
-  <p>
-    Případně můžete využít evropskou platformu pro řešení sporů online na adrese
-    <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">ec.europa.eu/consumers/odr</a>.
-  </p>
 
-  <h2>11. Závěrečná ustanovení</h2>
-  <ul>
-    <li>Vztah se řídí právním řádem České republiky, zejména zákonem č. 89/2012 Sb., občanský zákoník,
-        a zákonem č. 634/1992 Sb., o ochraně spotřebitele.</li>
-    <li>Podmínky mohu měnit; pro již uzavřené smlouvy platí znění účinné v době uzavření.</li>
-    <li>Odesláním objednávky klient potvrzuje, že se s podmínkami seznámil a souhlasí s nimi.</li>
-    <li>Je-li některé ustanovení neplatné, ostatní zůstávají v platnosti.</li>
-  </ul>
+  <div class="cl"><div class="cl-num">11.1</div><div class="cl-txt">
+    Klient může rovněž využít platformu pro řešení sporů online na adrese
+    <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">ec.europa.eu/consumers/odr</a>.
+  </div></div>
+
+  <h2>12. Závěrečná ustanovení</h2>
+
+  <div class="cl"><div class="cl-num">12.1</div><div class="cl-txt">
+    Vztahy neupravené těmito VOP se řídí právním řádem České republiky, zejména OZ
+    a zákonem č. 634/1992 Sb., o ochraně spotřebitele.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">12.2</div><div class="cl-txt">
+    Je-li některé ustanovení VOP neplatné či neúčinné, nebo se takovým stane, nahradí se
+    ustanovením, jehož smysl se neplatnému ustanovení co nejvíce přibližuje. Platnost ostatních
+    ustanovení tím není dotčena.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">12.3</div><div class="cl-txt">
+    Potvrzením objednávky klient stvrzuje, že se s těmito VOP seznámil, rozumí jim
+    a souhlasí s nimi.
+  </div></div>
 
 </main>
 
@@ -245,8 +360,7 @@
     <div>© 2026 Vojtěch Volejník · IČO 23705183</div>
     <div>
       <a href="index.html">Web</a> &nbsp;·&nbsp;
-      <a href="ochrana-osobnich-udaju.html">Ochrana údajů</a> &nbsp;·&nbsp;
-      <a href="cookies.html">Cookies</a>
+      <a href="ochrana-osobnich-udaju.html">Ochrana osobních údajů</a>
     </div>
   </div>
 </footer>
