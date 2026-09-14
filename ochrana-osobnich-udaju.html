@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ochrana osobních údajů — Vojtěch Volejník</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:#FAFAF9; --sage:#4A5E3A; --sage-dark:#3A4D2C; --peach:#E8F0E0;
+    --terra:#1C1C1E; --white:#FFFFFF; --border:#E0DDD8;
+    --sans:'DM Sans',system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--white);color:var(--terra);font-size:16px;line-height:1.7}
+  nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
+      padding:0 40px;height:68px;background:var(--white);border-bottom:1px solid var(--border)}
+  .nav-logo{font-size:17px;font-weight:700;letter-spacing:-0.01em;color:var(--terra);text-decoration:none}
+  .nav-back{font-size:14px;color:var(--sage);text-decoration:none;font-weight:600}
+  .nav-back:hover{color:var(--sage-dark)}
+  main{max-width:760px;margin:0 auto;padding:64px 24px 96px}
+  .doc-tag{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);margin-bottom:12px}
+  h1{font-size:38px;font-weight:700;letter-spacing:-0.02em;line-height:1.15;margin-bottom:14px}
+  .doc-date{font-size:14px;color:rgba(28,28,30,.45);margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+  h2{font-size:21px;font-weight:700;letter-spacing:-0.01em;margin:40px 0 14px;color:var(--terra)}
+  h3{font-size:16px;font-weight:700;margin:26px 0 8px;color:var(--sage-dark)}
+  p{margin-bottom:14px;color:rgba(28,28,30,.78)}
+  ul,ol{margin:0 0 16px 22px;color:rgba(28,28,30,.78)}
+  li{margin-bottom:7px}
+  strong{font-weight:700;color:var(--terra)}
+  a{color:var(--sage)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th{background:var(--cream);text-align:left;padding:11px 14px;font-weight:700;font-size:13px;border:1px solid var(--border)}
+  td{padding:11px 14px;border:1px solid var(--border);color:rgba(28,28,30,.78)}
+  .note{background:var(--peach);border-left:3px solid var(--sage);padding:16px 20px;margin:22px 0;font-size:14px;border-radius:0 8px 8px 0}
+  .warn{background:#FEF3C7;border-left:3px solid #F59E0B;padding:16px 20px;margin:22px 0;font-size:14px;border-radius:0 8px 8px 0;color:#78350F}
+  footer{background:#1C2A16;padding:32px 40px;margin-top:64px}
+  .footer-inner{max-width:760px;margin:0 auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+                font-size:13px;color:rgba(255,255,255,.5)}
+  .footer-inner a{color:rgba(255,255,255,.5);text-decoration:none}
+  .footer-inner a:hover{color:#A8C4A0}
+  @media(max-width:600px){
+    nav{padding:0 18px}
+    main{padding:44px 18px 64px}
+    h1{font-size:30px}
+    h2{font-size:19px}
+    footer{padding:28px 18px}
+    table{font-size:13px}
+    th,td{padding:9px 10px}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Vojtěch Volejník</a>
+  <a href="index.html" class="nav-back">← Zpět na web</a>
+</nav>
+
+<main>
+  <div class="doc-tag">Právní dokument</div>
+  <h1>Zásady ochrany osobních údajů</h1>
+  <p class="doc-date">Účinné od: 11. 9. 2026 &nbsp;·&nbsp; Verze 1.0</p>
+
+  <div class="warn">
+    <strong>⚠️ Pozor — text ke kontrole</strong><br>
+    Tento dokument je připravený rámec, který popisuje reálné fungování webu. Před zveřejněním jej nechte
+    zkontrolovat advokátem specializovaným na GDPR, zejména kvůli zpracování údajů o zdravotním stavu.
+    Doplňte místa označená hranatými závorkami.
+  </div>
+
+  <h2>1. Kdo jsem a jak mě kontaktovat</h2>
+  <p>
+    Správcem vašich osobních údajů jsem já, <strong>Vojtěch Volejník</strong>, fyzická osoba podnikající
+    na základě živnostenského oprávnění.
+  </p>
+  <ul>
+    <li>IČO: <strong>23705183</strong></li>
+    <li>Sídlo: <strong>Pátek 166, 290 01 Pátek</strong></li>
+    <li>E-mail: <a href="mailto:vojtechvolejnik@gmail.com">vojtechvolejnik@gmail.com</a></li>
+    <li>Telefon: +420 774 644 496</li>
+  </ul>
+  <p>
+    Nejmenoval jsem pověřence pro ochranu osobních údajů — tuto povinnost nemám, protože zpracování
+    nedosahuje rozsahu, který by ji zakládal.
+  </p>
+
+  <h2>2. Jaké údaje zpracovávám a proč</h2>
+
+  <h3>2.1 Údaje z kontaktního formuláře</h3>
+  <table>
+    <tr><th>Údaj</th><th>Účel</th><th>Právní základ</th><th>Doba uchování</th></tr>
+    <tr><td>Jméno a příjmení</td><td>Oslovení a vyřízení poptávky</td><td>Souhlas / jednání o smlouvě</td><td>3 roky</td></tr>
+    <tr><td>E-mailová adresa</td><td>Odpověď na poptávku</td><td>Souhlas / jednání o smlouvě</td><td>3 roky</td></tr>
+    <tr><td>Zájem o službu</td><td>Příprava nabídky</td><td>Souhlas</td><td>3 roky</td></tr>
+    <tr><td>Text zprávy</td><td>Pochopení vaší situace</td><td>Souhlas</td><td>3 roky</td></tr>
+  </table>
+
+  <h3>2.2 Údaje klientů v rámci spolupráce</h3>
+  <p>
+    Pokud se rozhodneme spolupracovat, zpracovávám navíc údaje potřebné k sestavení výživového plánu:
+  </p>
+  <table>
+    <tr><th>Údaj</th><th>Účel</th><th>Právní základ</th><th>Doba uchování</th></tr>
+    <tr><td>Věk, pohlaví, výška, hmotnost</td><td>Výpočet energetické potřeby</td><td>Plnění smlouvy</td><td>Po dobu spolupráce + 3 roky</td></tr>
+    <tr><td>Tělesné složení (tuk, svaly)</td><td>Sledování pokroku</td><td>Plnění smlouvy</td><td>Po dobu spolupráce + 3 roky</td></tr>
+    <tr><td>Pohybová aktivita</td><td>Nastavení příjmu</td><td>Plnění smlouvy</td><td>Po dobu spolupráce + 3 roky</td></tr>
+    <tr><td>Stravovací návyky a preference</td><td>Sestavení jídelníčku</td><td>Plnění smlouvy</td><td>Po dobu spolupráce + 3 roky</td></tr>
+    <tr><td>Telefonní číslo</td><td>Komunikace</td><td>Plnění smlouvy</td><td>Po dobu spolupráce + 3 roky</td></tr>
+    <tr><td>Fakturační údaje</td><td>Vystavení dokladu</td><td>Právní povinnost</td><td>10 let (zákon o účetnictví)</td></tr>
+  </table>
+
+  <h3>2.3 Údaje o zdravotním stavu — zvláštní kategorie</h3>
+  <div class="note">
+    <strong>Přes tento web údaje o zdravotním stavu nesbírám.</strong> Kontaktní formulář se ptá
+    pouze na jméno, e-mail, zájem o službu a text zprávy. Nic víc.
+  </div>
+  <p>
+    Informace o alergiích, intolerancích nebo zdravotních omezeních zjišťuji <strong>až po zahájení
+    spolupráce</strong>, ve vstupním dotazníku, a to pouze v rozsahu, který má přímý vliv na sestavení
+    výživového plánu. Tyto údaje patří podle čl. 9 GDPR mezi zvláštní kategorie osobních údajů
+    a zpracovávám je výhradně na základě <strong>výslovného souhlasu</strong>, který klient uděluje
+    samostatným zaškrtnutím v dotazníku.
+  </p>
+  <p>Konkrétně to znamená:</p>
+  <ul>
+    <li><strong>Sbírám jen nezbytné minimum</strong> — alergie, potravinové intolerance a diagnózy
+        vyžadující dietní opatření. Nezajímá mě vaše zdravotní historie, léky ani výsledky vyšetření.</li>
+    <li><strong>Souhlas je dobrovolný a odvolatelný</strong> kdykoli, e-mailem, bez udání důvodu.
+        Odvolání může znamenat, že službu nebudu moci poskytnout bezpečně — bez znalosti alergií
+        nelze sestavit odpovědný jídelníček.</li>
+    <li><strong>Přístup mám pouze já.</strong> Údaje nikomu nepředávám.</li>
+    <li><strong>Po skončení spolupráce</strong> je na vaši žádost smažu okamžitě, jinak nejpozději
+        do 3 let.</li>
+  </ul>
+  <p>
+    <strong>Nejsem zdravotnický pracovník</strong> a neposkytuji zdravotní péči. Výživové poradenství
+    nenahrazuje lékařskou péči, diagnostiku ani léčbu. Údaje o zdravotním stavu slouží výhradně k tomu,
+    abych při sestavování plánu zohlednil vaše omezení a neohrozil vás.
+  </p>
+
+  <h2>3. Komu údaje předávám</h2>
+  <p>Vaše údaje nikomu neprodávám ani nepředávám pro marketingové účely. Využívám ale technické služby, které se považují za zpracovatele:</p>
+  <table>
+    <tr><th>Služba</th><th>K čemu slouží</th><th>Kde jsou data</th></tr>
+    <tr><td>Supabase</td><td>Databáze klientů a evidence</td><td>EU (Frankfurt)</td></tr>
+    <tr><td>Netlify</td><td>Hosting webu</td><td>EU / USA (standardní smluvní doložky)</td></tr>
+    <tr><td>EmailJS</td><td>Odesílání e-mailů z formuláře</td><td>USA (standardní smluvní doložky)</td></tr>
+    <tr><td>Google (Gmail)</td><td>E-mailová komunikace</td><td>EU / USA (standardní smluvní doložky)</td></tr>
+  </table>
+  <p>
+    Se všemi zpracovateli mám nebo budu mít uzavřenu zpracovatelskou smlouvu podle čl. 28 GDPR.
+    Dále mohu údaje předat účetnímu nebo daňovému poradci, případně orgánům veřejné moci, pokud to
+    ukládá zákon.
+  </p>
+
+  <h2>4. Cookies a analytika</h2>
+  <p>
+    Web aktuálně používá <strong>pouze technické cookies</strong> nezbytné pro jeho fungování — konkrétně
+    ukládá vaši volbu ohledně cookies, aby se vás lišta neptala opakovaně. Tyto cookies nevyžadují souhlas.
+  </p>
+  <p>
+    Nepoužívám Google Analytics, Facebook Pixel ani jiné sledovací nástroje. Pokud to v budoucnu změním,
+    budete o tom informováni a budete moci souhlas udělit nebo odmítnout. Podrobnosti najdete
+    v <a href="cookies.html">zásadách cookies</a>.
+  </p>
+
+  <h2>5. Jaká máte práva</h2>
+  <p>Podle GDPR máte tato práva, která můžete uplatnit e-mailem na vojtechvolejnik@gmail.com:</p>
+  <ul>
+    <li><strong>Právo na přístup</strong> — můžete se zeptat, jaké údaje o vás mám, a získat jejich kopii.</li>
+    <li><strong>Právo na opravu</strong> — pokud jsou údaje nepřesné, opravím je.</li>
+    <li><strong>Právo na výmaz</strong> — můžete požádat o smazání údajů, pokud nemám zákonný důvod je uchovávat.</li>
+    <li><strong>Právo na omezení zpracování</strong> — můžete požádat, abych s údaji dočasně nepracoval.</li>
+    <li><strong>Právo na přenositelnost</strong> — údaje vám poskytnu ve strojově čitelném formátu.</li>
+    <li><strong>Právo vznést námitku</strong> — proti zpracování založenému na oprávněném zájmu.</li>
+    <li><strong>Právo odvolat souhlas</strong> — kdykoli, bez uvedení důvodu, bez vlivu na zpracování před odvoláním.</li>
+    <li><strong>Právo podat stížnost</strong> — u Úřadu pro ochranu osobních údajů, Pplk. Sochora 27, 170 00 Praha 7,
+        <a href="https://www.uoou.cz" target="_blank" rel="noopener">www.uoou.cz</a>.</li>
+  </ul>
+  <p>Na vaši žádost odpovím <strong>do 30 dnů</strong>. Vyřízení je bezplatné.</p>
+
+  <h2>6. Jak údaje chráním</h2>
+  <ul>
+    <li>Databáze je zabezpečena přístupem přes heslo a šifrovaným spojením (HTTPS).</li>
+    <li>Přístup do evidence klientů mám pouze já, chráněný samostatným heslem.</li>
+    <li>Údaje neukládám na nezabezpečená zařízení ani je neposílám nešifrovanými kanály.</li>
+    <li>Papírové podklady, pokud nějaké vzniknou, uchovávám uzamčené.</li>
+  </ul>
+
+  <h2>7. Automatizované rozhodování</h2>
+  <p>
+    Neprovádím automatizované rozhodování ani profilování s právními účinky. Výpočty energetické
+    potřeby a doporučení jsou pomocné nástroje — konečné rozhodnutí vždy dělám já s ohledem na vaši
+    konkrétní situaci.
+  </p>
+
+  <h2>8. Změny těchto zásad</h2>
+  <p>
+    Zásady mohu aktualizovat. Aktuální verze je vždy dostupná na této adrese. Pokud dojde k podstatné
+    změně, upozorním na ni klienty e-mailem.
+  </p>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>© 2026 Vojtěch Volejník · IČO 23705183</div>
+    <div>
+      <a href="index.html">Web</a> &nbsp;·&nbsp;
+      <a href="obchodni-podminky.html">Obchodní podmínky</a> &nbsp;·&nbsp;
+      <a href="cookies.html">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
