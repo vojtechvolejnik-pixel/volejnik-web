@@ -19,26 +19,21 @@
   .nav-back{font-size:14px;color:var(--sage);text-decoration:none;font-weight:600}
   .nav-back:hover{color:var(--sage-dark)}
   main{max-width:760px;margin:0 auto;padding:64px 24px 96px}
-  .doc-tag{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--sage);margin-bottom:12px}
-  h1{font-size:clamp(30px,5vw,44px);font-weight:700;letter-spacing:-0.03em;line-height:1.05;
-     text-transform:uppercase;margin-bottom:14px}
+  
+  h1{font-size:clamp(26px,4vw,34px);font-weight:700;letter-spacing:-0.02em;line-height:1.15;
+     margin-bottom:12px}
   .doc-date{font-size:13px;color:rgba(28,28,30,.45);margin-bottom:36px;padding-bottom:22px;border-bottom:1px solid var(--border)}
   .intro{font-size:15px;color:rgba(28,28,30,.72);margin-bottom:8px}
   h2{font-size:16px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;
-     margin:44px 0 16px;padding-bottom:9px;border-bottom:2px solid var(--sage);color:var(--terra)}
+     margin:40px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);color:var(--terra)}
   p{margin-bottom:11px;color:rgba(28,28,30,.78)}
   .cl{display:flex;gap:12px;margin-bottom:11px}
-  .cl-num{flex-shrink:0;font-weight:700;color:var(--sage);font-size:14px;min-width:34px;padding-top:1px}
+  .cl-num{flex-shrink:0;font-weight:600;color:rgba(28,28,30,.45);font-size:14px;min-width:34px;padding-top:1px}
   .cl-txt{color:rgba(28,28,30,.78)}
   ul{margin:8px 0 12px 20px;color:rgba(28,28,30,.78)}
   li{margin-bottom:6px}
-  strong{font-weight:700;color:var(--terra)}
+  
   a{color:var(--sage)}
-  .note{background:var(--peach);border-left:3px solid var(--sage);padding:16px 20px;margin:20px 0;
-        font-size:14px;border-radius:0 8px 8px 0}
-  .crit{background:#FEF2F2;border-left:3px solid #DC2626;padding:16px 20px;margin:20px 0;
-        font-size:14px;border-radius:0 8px 8px 0;color:#7F1D1D}
-  .crit strong{color:#7F1D1D}
   footer{background:#1C2A16;padding:32px 40px;margin-top:64px}
   .footer-inner{max-width:760px;margin:0 auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
                 font-size:12px;color:rgba(255,255,255,.45)}
@@ -48,6 +43,8 @@
     nav{padding:0 18px}main{padding:44px 18px 64px}
     footer{padding:28px 18px}.cl{gap:9px}.cl-num{min-width:30px;font-size:13px}
   }
+  .form-vzor{border:1px solid var(--border);padding:18px 22px;margin:16px 0 18px;
+              font-size:14px;line-height:1.9;color:rgba(28,28,30,.7);background:#FCFCFB}
 </style>
 </head>
 <body>
@@ -58,21 +55,20 @@
 </nav>
 
 <main>
-  <div class="doc-tag">Právní dokument</div>
   <h1>Všeobecné obchodní podmínky</h1>
   <p class="doc-date">Účinné od 14. 9. 2026 &nbsp;·&nbsp; Verze 1.0</p>
 
   <p class="intro">
-    Tyto všeobecné obchodní podmínky (dále jen <strong>„VOP“</strong>) upravují v souladu
+    Tyto všeobecné obchodní podmínky (dále jen „VOP“) upravují v souladu
     s ustanovením § 1751 zákona č. 89/2012 Sb., občanský zákoník, ve znění pozdějších předpisů
-    (dále jen <strong>„OZ“</strong>), vzájemná práva a povinnosti smluvních stran vzniklé
+    (dále jen „OZ“), vzájemná práva a povinnosti smluvních stran vzniklé
     v souvislosti s poskytováním služeb výživového poradenství.
   </p>
 
   <h2>1. Smluvní strany a základní ustanovení</h2>
 
   <div class="cl"><div class="cl-num">1.1</div><div class="cl-txt">
-    <strong>Poskytovatelem</strong> je Vojtěch Volejník, IČO 23705183, se sídlem č.p. 166,
+    Poskytovatelem je Vojtěch Volejník, IČO 23705183, se sídlem č.p. 166,
     290 01 Pátek, fyzická osoba zapsaná v živnostenském rejstříku. Poskytovatel není plátcem DPH.
   </div></div>
 
@@ -82,7 +78,7 @@
   </div></div>
 
   <div class="cl"><div class="cl-num">1.3</div><div class="cl-txt">
-    <strong>Klientem</strong> je fyzická osoba, která si objedná některou ze služeb poskytovatele.
+    Klientem je fyzická osoba, která si objedná některou ze služeb poskytovatele.
     Je-li klient spotřebitelem ve smyslu § 419 OZ, vztahuje se na něj zvýšená ochrana podle
     zákona č. 634/1992 Sb., o ochraně spotřebitele.
   </div></div>
@@ -111,18 +107,17 @@
     závazně vymezuje, co konkrétně klient obdrží.
   </div></div>
 
-  <div class="crit">
-    <strong>2.3 — Služby nejsou zdravotními službami</strong><br><br>
-    Služby poskytovatele <strong>nejsou zdravotními službami (zdravotní péčí)</strong> ve smyslu
-    zákona č. 372/2011 Sb., o zdravotních službách, ani specifickými zdravotními službami
-    ve smyslu zákona č. 373/2011 Sb. Poskytovatel není lékařem ani zdravotnickým pracovníkem
-    a poskytované poradenství <strong>nenahrazuje lékařskou péči, diagnostiku ani léčbu</strong>.
-  </div>
+  <div class="cl"><div class="cl-num">2.3</div><div class="cl-txt">
+    Služby poskytovatele nejsou zdravotními službami (zdravotní péčí) ve smyslu zákona
+    č. 372/2011 Sb., o zdravotních službách, ani specifickými zdravotními službami ve smyslu
+    zákona č. 373/2011 Sb. Poskytovatel není lékařem ani zdravotnickým pracovníkem a poskytované
+    poradenství nenahrazuje lékařskou péči, diagnostiku ani léčbu.
+  </div></div>
 
   <div class="cl"><div class="cl-num">2.4</div><div class="cl-txt">
     Vyžaduje-li zdravotní stav klienta zvláštní výživový režim, je-li klient omezen v užívání
-    určitého druhu výživy, užívá-li léky, je těhotný nebo kojící, je <strong>povinen se předem
-    poradit se svým lékařem</strong> a o těchto skutečnostech poskytovatele informovat.
+    určitého druhu výživy, užívá-li léky, je těhotný nebo kojící, je povinen se předem
+    poradit se svým lékařem a o těchto skutečnostech poskytovatele informovat.
   </div></div>
 
   <div class="cl"><div class="cl-num">2.5</div><div class="cl-txt">
@@ -142,7 +137,7 @@
   </div></div>
 
   <div class="cl"><div class="cl-num">3.3</div><div class="cl-txt">
-    <strong>Smlouva o poskytování služeb je uzavřena</strong> okamžikem, kdy klient závazně
+    Smlouva o poskytování služeb je uzavřena okamžikem, kdy klient závazně
     potvrdí objednávku a poskytovatel její přijetí potvrdí. Potvrzení e-mailem je pro tyto
     účely dostačující a považuje se za uzavření smlouvy na dálku.
   </div></div>
@@ -165,13 +160,13 @@
   </div></div>
 
   <div class="cl"><div class="cl-num">4.2</div><div class="cl-txt">
-    Na objednanou službu vystaví poskytovatel <strong>fakturu se splatností 7 dnů</strong>,
+    Na objednanou službu vystaví poskytovatel fakturu se splatností 7 dnů,
     není-li dohodnuto jinak.
   </div></div>
 
   <div class="cl"><div class="cl-num">4.3</div><div class="cl-txt">
-    Cenu lze uhradit <strong>bankovním převodem</strong> na účet uvedený na faktuře nebo
-    <strong>v hotovosti</strong> při osobním setkání. Při platbě v hotovosti vystaví poskytovatel
+    Cenu lze uhradit bankovním převodem na účet uvedený na faktuře nebo
+    v hotovosti při osobním setkání. Při platbě v hotovosti vystaví poskytovatel
     příjmový pokladní doklad.
   </div></div>
 
@@ -197,7 +192,7 @@
   </div></div>
 
   <div class="cl"><div class="cl-num">5.3</div><div class="cl-txt">
-    Klient je povinen <strong>poskytnout úplné a pravdivé informace</strong> potřebné k poskytnutí
+    Klient je povinen poskytnout úplné a pravdivé informace potřebné k poskytnutí
     služby, zejména o svém zdravotním stavu, alergiích, intolerancích, užívaných lécích
     a doplňcích stravy, a nic podstatného nezatajovat.
   </div></div>
@@ -208,7 +203,7 @@
   </div></div>
 
   <div class="cl"><div class="cl-num">5.5</div><div class="cl-txt">
-    <strong>Zrušení sjednaného termínu:</strong> zruší-li klient termín více než 24 hodin předem,
+    Zrušení sjednaného termínu: zruší-li klient termín více než 24 hodin předem,
     bude přesunut bez poplatku. Při zrušení méně než 24 hodin předem nebo při nedostavení se
     termín propadá a cena se nevrací; ve výjimečných případech lze po dohodě termín přesunout.
     Zruší-li termín poskytovatel, nabídne náhradní termín nebo vrátí poměrnou část ceny.
@@ -218,25 +213,38 @@
 
   <div class="cl"><div class="cl-num">6.1</div><div class="cl-txt">
     Je-li klient spotřebitelem, má právo odstoupit od smlouvy uzavřené na dálku
-    <strong>do 14 dnů</strong> ode dne jejího uzavření, bez udání důvodu. Odstoupení postačí
+    do 14 dnů ode dne jejího uzavření, bez udání důvodu. Odstoupení postačí
     zaslat e-mailem na vojtechvolejnik@gmail.com.
   </div></div>
 
-  <div class="note">
-    <strong>6.2 — Zahájení plnění před uplynutím lhůty</strong><br><br>
+  <div class="cl"><div class="cl-num">6.2</div><div class="cl-txt">
     Požaduje-li klient zahájení poskytování služby před uplynutím 14denní lhůty, musí s tím
-    <strong>výslovně souhlasit</strong> a potvrdit, že byl poučen o následcích. Odstoupí-li poté
-    od smlouvy, uhradí poměrnou část ceny odpovídající rozsahu již poskytnutého plnění.
-    Bylo-li plnění poskytnuto v plném rozsahu, právo na odstoupení podle čl. 6.1 zaniká.
-  </div>
+    výslovně souhlasit a potvrdit, že byl poučen o následcích. Odstoupí-li poté od smlouvy,
+    uhradí poměrnou část ceny odpovídající rozsahu již poskytnutého plnění. Bylo-li plnění
+    poskytnuto v plném rozsahu, právo na odstoupení podle čl. 6.1 zaniká.
+  </div></div>
 
   <div class="cl"><div class="cl-num">6.3</div><div class="cl-txt">
+    Pro odstoupení může klient použít níže uvedený vzorový text, není to však jeho povinností —
+    odstoupení lze učinit jakýmkoli jednoznačným prohlášením zaslaným na e-mail poskytovatele.
+  </div></div>
+
+  <div class="form-vzor">
+    Adresát: Vojtěch Volejník, IČO 23705183, vojtechvolejnik@gmail.com<br><br>
+    Oznamuji, že tímto odstupuji od smlouvy o poskytnutí následující služby: …………<br>
+    Datum objednání / uzavření smlouvy: …………<br>
+    Jméno a příjmení klienta: …………<br>
+    E-mail klienta: …………<br>
+    Datum: …………
+  </div>
+
+  <div class="cl"><div class="cl-num">6.4</div><div class="cl-txt">
     U digitálního obsahu dodaného elektronicky (e-booky, PDF materiály) zaniká právo na odstoupení
     okamžikem jeho zpřístupnění, pokud s tím klient předem výslovně souhlasil a byl poučen
     o zániku tohoto práva.
   </div></div>
 
-  <div class="cl"><div class="cl-num">6.4</div><div class="cl-txt">
+  <div class="cl"><div class="cl-num">6.5</div><div class="cl-txt">
     Poskytovatel je oprávněn od smlouvy odstoupit, poruší-li klient podstatným způsobem své
     povinnosti, zejména uvedl-li nepravdivé informace o svém zdravotním stavu nebo je-li
     v prodlení s úhradou déle než 14 dnů.
@@ -249,21 +257,20 @@
     byla dodána v jiném rozsahu, než bylo sjednáno, nebo obsahuje zjevnou chybu.
   </div></div>
 
-  <div class="note">
-    <strong>7.2 — Co vadou není</strong><br><br>
+  <div class="cl"><div class="cl-num">7.2</div><div class="cl-txt">
     Poskytovatel poskytuje služby s odbornou péčí na základě absolvovaného kurzu výživového
-    poradenství a dostupných odborných poznatků, avšak <strong>negarantuje dosažení konkrétního
-    výsledku</strong>. Výsledek závisí na dodržování doporučení, individuálních dispozicích klienta
-    a dalších faktorech mimo kontrolu poskytovatele. Nedosažení očekávaného výsledku není vadou služby.
-  </div>
+    poradenství a dostupných odborných poznatků, avšak negarantuje dosažení konkrétního výsledku.
+    Výsledek závisí na dodržování doporučení, individuálních dispozicích klienta a dalších faktorech
+    mimo kontrolu poskytovatele. Nedosažení očekávaného výsledku není vadou služby.
+  </div></div>
 
   <div class="cl"><div class="cl-num">7.3</div><div class="cl-txt">
-    Reklamaci klient uplatní <strong>e-mailem</strong> bez zbytečného odkladu poté, co vadu zjistil.
+    Reklamaci klient uplatní e-mailem bez zbytečného odkladu poté, co vadu zjistil.
     V reklamaci popíše, v čem vadu spatřuje, a uvede požadovaný způsob vyřízení.
   </div></div>
 
   <div class="cl"><div class="cl-num">7.4</div><div class="cl-txt">
-    Poskytovatel přijetí reklamace písemně potvrdí a <strong>vyřídí ji nejpozději do 30 dnů</strong>
+    Poskytovatel přijetí reklamace písemně potvrdí a vyřídí ji nejpozději do 30 dnů
     od jejího uplatnění, přičemž o výsledku klienta písemně vyrozumí. Delší lhůtu lze sjednat
     pouze výslovnou dohodou.
   </div></div>
@@ -277,7 +284,7 @@
   <h2>8. Omezení odpovědnosti</h2>
 
   <div class="cl"><div class="cl-num">8.1</div><div class="cl-txt">
-    Poskytovatel <strong>neodpovídá za zdravotní komplikace a jejich následky</strong>, které
+    Poskytovatel neodpovídá za zdravotní komplikace a jejich následky, které
     jsou nebo mohou být způsobeny tím, že klient nevyhledal lékařskou péči v situaci,
     kdy to bylo vhodné nebo kdy mu to poskytovatel doporučil.
   </div></div>
@@ -312,27 +319,32 @@
   </div></div>
 
   <div class="cl"><div class="cl-num">10.2</div><div class="cl-txt">
-    Klient je oprávněn užívat materiály <strong>výhradně pro svou osobní potřebu</strong>.
+    Klient je oprávněn užívat materiály výhradně pro svou osobní potřebu.
     Jejich šíření, kopírování, zpřístupňování třetím osobám, prodej ani zveřejňování
     bez písemného souhlasu poskytovatele není dovoleno.
   </div></div>
 
   <h2>11. Mimosoudní řešení sporů</h2>
 
-  <div class="note">
-    <strong>Česká obchodní inspekce</strong><br><br>
-    Nedojde-li ke smírnému vyřešení sporu, má klient jako spotřebitel právo obrátit se na subjekt
-    mimosoudního řešení spotřebitelských sporů:<br><br>
-    Česká obchodní inspekce, Ústřední inspektorát — oddělení ADR<br>
-    Gorazdova 1969/24, 120 00 Praha 2<br>
-    <a href="https://adr.coi.cz" target="_blank" rel="noopener">adr.coi.cz</a> &nbsp;·&nbsp;
-    <a href="https://www.coi.cz" target="_blank" rel="noopener">www.coi.cz</a><br><br>
-    Návrh lze podat do 1 roku ode dne, kdy klient uplatnil své právo poprvé. Řízení je bezplatné.
-  </div>
-
   <div class="cl"><div class="cl-num">11.1</div><div class="cl-txt">
+    Nedojde-li ke smírnému vyřešení sporu, má klient jako spotřebitel právo obrátit se na subjekt
+    mimosoudního řešení spotřebitelských sporů, kterým je Česká obchodní inspekce, Ústřední
+    inspektorát — oddělení ADR, Gorazdova 1969/24, 120 00 Praha 2,
+    <a href="https://adr.coi.cz" target="_blank" rel="noopener">adr.coi.cz</a>.
+    Návrh lze podat do 1 roku ode dne, kdy klient uplatnil své právo poprvé. Řízení je bezplatné.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">11.2</div><div class="cl-txt">
     Klient může rovněž využít platformu pro řešení sporů online na adrese
     <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">ec.europa.eu/consumers/odr</a>.
+  </div></div>
+
+  <div class="cl"><div class="cl-num">11.3</div><div class="cl-txt">
+    Dozor nad dodržováním povinností</strong> podle zákona č. 634/1992 Sb., o ochraně
+    spotřebitele, vykonává Česká obchodní inspekce. Dozor nad oblastí živnostenského
+    podnikání vykonává příslušný živnostenský úřad. Dozor nad ochranou osobních údajů
+    vykonává Úřad pro ochranu osobních údajů, Pplk. Sochora 27, 170 00 Praha 7,
+    <a href="https://www.uoou.cz" target="_blank" rel="noopener">uoou.cz</a>.
   </div></div>
 
   <h2>12. Závěrečná ustanovení</h2>

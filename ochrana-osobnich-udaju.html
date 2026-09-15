@@ -22,20 +22,18 @@
   .nav-back{font-size:14px;color:var(--sage);text-decoration:none;font-weight:600}
   .nav-back:hover{color:var(--sage-dark)}
   main{max-width:760px;margin:0 auto;padding:64px 24px 96px}
-  .doc-tag{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);margin-bottom:12px}
-  h1{font-size:38px;font-weight:700;letter-spacing:-0.02em;line-height:1.15;margin-bottom:14px}
+  h1{font-size:clamp(26px,4vw,34px);font-weight:700;letter-spacing:-0.02em;line-height:1.15;margin-bottom:12px}
   .doc-date{font-size:14px;color:rgba(28,28,30,.45);margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--border)}
-  h2{font-size:21px;font-weight:700;letter-spacing:-0.01em;margin:40px 0 14px;color:var(--terra)}
-  h3{font-size:16px;font-weight:700;margin:26px 0 8px;color:var(--sage-dark)}
+  h2{font-size:16px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;margin:40px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);color:var(--terra)}
+  h3{font-size:15px;font-weight:700;margin:26px 0 8px;color:var(--terra)}
   p{margin-bottom:14px;color:rgba(28,28,30,.78)}
   ul,ol{margin:0 0 16px 22px;color:rgba(28,28,30,.78)}
   li{margin-bottom:7px}
-  strong{font-weight:700;color:var(--terra)}
+  
   a{color:var(--sage)}
   table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
-  th{background:var(--cream);text-align:left;padding:11px 14px;font-weight:700;font-size:13px;border:1px solid var(--border)}
+  th{background:#FCFCFB;text-align:left;padding:11px 14px;font-weight:600;font-size:13px;border:1px solid var(--border);color:rgba(28,28,30,.6)}
   td{padding:11px 14px;border:1px solid var(--border);color:rgba(28,28,30,.78)}
-  .note{background:var(--peach);border-left:3px solid var(--sage);padding:16px 20px;margin:22px 0;font-size:14px;border-radius:0 8px 8px 0}
   footer{background:#1C2A16;padding:32px 40px;margin-top:64px}
   .footer-inner{max-width:760px;margin:0 auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
                 font-size:13px;color:rgba(255,255,255,.5)}
@@ -60,18 +58,17 @@
 </nav>
 
 <main>
-  <div class="doc-tag">Právní dokument</div>
   <h1>Zásady ochrany osobních údajů</h1>
   <p class="doc-date">Účinné od: 11. 9. 2026 &nbsp;·&nbsp; Verze 1.0</p>
 
   <h2>1. Kdo jsem a jak mě kontaktovat</h2>
   <p>
-    Správcem vašich osobních údajů jsem já, <strong>Vojtěch Volejník</strong>, fyzická osoba podnikající
+    Správcem vašich osobních údajů jsem já, Vojtěch Volejník, fyzická osoba podnikající
     na základě živnostenského oprávnění.
   </p>
   <ul>
-    <li>IČO: <strong>23705183</strong></li>
-    <li>Sídlo: <strong>Pátek 166, 290 01 Pátek</strong></li>
+    <li>IČO: 23705183</li>
+    <li>Sídlo: Pátek 166, 290 01 Pátek</li>
     <li>E-mail: <a href="mailto:vojtechvolejnik@gmail.com">vojtechvolejnik@gmail.com</a></li>
   </ul>
   <p>
@@ -92,7 +89,7 @@
     <tr><td>Vybraná služba</td><td>Příprava relevantní nabídky</td><td>Souhlas, resp. jednání o smlouvě</td><td>3 roky</td></tr>
   </table>
   <p>
-    <strong>Nic dalšího přes web nesbírám</strong> — ani jméno, ani telefon, ani text zprávy.
+    Nic dalšího přes web nesbírám — ani jméno, ani telefon, ani text zprávy.
     Další údaje zjišťuji až v přímé komunikaci, pokud se rozhodneme spolupracovat.
   </p>
 
@@ -111,32 +108,42 @@
   </table>
 
   <h3>2.3 Údaje o zdravotním stavu — zvláštní kategorie</h3>
-  <div class="note">
-    <strong>Přes tento web údaje o zdravotním stavu nesbírám.</strong> Kontaktní formulář se ptá
-    pouze na jméno, e-mail, zájem o službu a text zprávy. Nic víc.
-  </div>
+  <p>Přes tento web údaje o zdravotním stavu nesbírám. Kontaktní formulář se ptá
+    pouze na jméno, e-mail, zájem o službu a text zprávy. Nic víc.</p>
   <p>
-    Informace o alergiích, intolerancích nebo zdravotních omezeních zjišťuji <strong>až po zahájení
-    spolupráce</strong>, ve vstupním dotazníku, a to pouze v rozsahu, který má přímý vliv na sestavení
+    Informace o alergiích, intolerancích nebo zdravotních omezeních zjišťuji až po zahájení
+    spolupráce, ve vstupním dotazníku, a to pouze v rozsahu, který má přímý vliv na sestavení
     výživového plánu. Tyto údaje patří podle čl. 9 GDPR mezi zvláštní kategorie osobních údajů
-    a zpracovávám je výhradně na základě <strong>výslovného souhlasu</strong>, který klient uděluje
+    a zpracovávám je výhradně na základě výslovného souhlasu, který klient uděluje
     samostatným zaškrtnutím v dotazníku.
   </p>
   <p>Konkrétně to znamená:</p>
   <ul>
-    <li><strong>Sbírám jen nezbytné minimum</strong> — alergie, potravinové intolerance a diagnózy
+    <li>Sbírám jen nezbytné minimum — alergie, potravinové intolerance a diagnózy
         vyžadující dietní opatření. Nezajímá mě vaše zdravotní historie, léky ani výsledky vyšetření.</li>
-    <li><strong>Souhlas je dobrovolný a odvolatelný</strong> kdykoli, e-mailem, bez udání důvodu.
+    <li>Souhlas je dobrovolný a odvolatelný kdykoli, e-mailem, bez udání důvodu.
         Odvolání může znamenat, že službu nebudu moci poskytnout bezpečně — bez znalosti alergií
         nelze sestavit odpovědný jídelníček.</li>
-    <li><strong>Přístup mám pouze já.</strong> Údaje nikomu nepředávám.</li>
-    <li><strong>Po skončení spolupráce</strong> je na vaši žádost smažu okamžitě, jinak nejpozději
+    <li>Přístup mám pouze já. Údaje nikomu nepředávám.</li>
+    <li>Po skončení spolupráce je na vaši žádost smažu okamžitě, jinak nejpozději
         do 3 let.</li>
   </ul>
   <p>
-    <strong>Nejsem zdravotnický pracovník</strong> a neposkytuji zdravotní péči. Výživové poradenství
+    Nejsem zdravotnický pracovník a neposkytuji zdravotní péči. Výživové poradenství
     nenahrazuje lékařskou péči, diagnostiku ani léčbu. Údaje o zdravotním stavu slouží výhradně k tomu,
     abych při sestavování plánu zohlednil vaše omezení a neohrozil vás.
+  </p>
+
+  <h3>2.4 Odkud údaje mám a zda je musíte poskytnout</h3>
+  <p>
+    Veškeré osobní údaje získávám přímo od vás — z kontaktního formuláře,
+    ze vstupního dotazníku nebo z naší e-mailové komunikace. Nezískávám údaje z veřejných
+    rejstříků, od třetích osob ani je nikde nenakupuji.
+  </p>
+  <p>
+    Poskytnutí údajů je dobrovolné. Bez e-mailové adresy vám ale nemohu odpovědět
+    na poptávku a bez údajů ze vstupního dotazníku nelze službu poskytnout — jde o smluvní požadavek,
+    nikoli zákonnou povinnost.
   </p>
 
   <h2>3. Komu údaje předávám</h2>
@@ -156,7 +163,7 @@
 
   <h2>4. Cookies a analytika</h2>
   <p>
-    Tento web <strong>nepoužívá žádné cookies</strong> ani jiné sledovací technologie.
+    Tento web nepoužívá žádné cookies ani jiné sledovací technologie.
     Nepoužívám Google Analytics, Facebook Pixel ani podobné nástroje. Vaše chování na webu
     nesleduji a nikomu neprodávám.
   </p>
@@ -168,17 +175,17 @@
   <h2>5. Jaká máte práva</h2>
   <p>Podle GDPR máte tato práva, která můžete uplatnit e-mailem na vojtechvolejnik@gmail.com:</p>
   <ul>
-    <li><strong>Právo na přístup</strong> — můžete se zeptat, jaké údaje o vás mám, a získat jejich kopii.</li>
-    <li><strong>Právo na opravu</strong> — pokud jsou údaje nepřesné, opravím je.</li>
-    <li><strong>Právo na výmaz</strong> — můžete požádat o smazání údajů, pokud nemám zákonný důvod je uchovávat.</li>
-    <li><strong>Právo na omezení zpracování</strong> — můžete požádat, abych s údaji dočasně nepracoval.</li>
-    <li><strong>Právo na přenositelnost</strong> — údaje vám poskytnu ve strojově čitelném formátu.</li>
-    <li><strong>Právo vznést námitku</strong> — proti zpracování založenému na oprávněném zájmu.</li>
-    <li><strong>Právo odvolat souhlas</strong> — kdykoli, bez uvedení důvodu, bez vlivu na zpracování před odvoláním.</li>
-    <li><strong>Právo podat stížnost</strong> — u Úřadu pro ochranu osobních údajů, Pplk. Sochora 27, 170 00 Praha 7,
+    <li>Právo na přístup — můžete se zeptat, jaké údaje o vás mám, a získat jejich kopii.</li>
+    <li>Právo na opravu — pokud jsou údaje nepřesné, opravím je.</li>
+    <li>Právo na výmaz — můžete požádat o smazání údajů, pokud nemám zákonný důvod je uchovávat.</li>
+    <li>Právo na omezení zpracování — můžete požádat, abych s údaji dočasně nepracoval.</li>
+    <li>Právo na přenositelnost — údaje vám poskytnu ve strojově čitelném formátu.</li>
+    <li>Právo vznést námitku — proti zpracování založenému na oprávněném zájmu.</li>
+    <li>Právo odvolat souhlas — kdykoli, bez uvedení důvodu, bez vlivu na zpracování před odvoláním.</li>
+    <li>Právo podat stížnost — u Úřadu pro ochranu osobních údajů, Pplk. Sochora 27, 170 00 Praha 7,
         <a href="https://www.uoou.cz" target="_blank" rel="noopener">www.uoou.cz</a>.</li>
   </ul>
-  <p>Na vaši žádost odpovím <strong>do 30 dnů</strong>. Vyřízení je bezplatné.</p>
+  <p>Na vaši žádost odpovím do 30 dnů. Vyřízení je bezplatné.</p>
 
   <h2>6. Jak údaje chráním</h2>
   <ul>
