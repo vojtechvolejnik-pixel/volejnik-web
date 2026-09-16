@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{--cream:#FAFAF9;--sage:#4A5E3A;--sage-dark:#3A4D2C;--peach:#E8F0E0;
         --terra:#1C1C1E;--white:#FFFFFF;--border:#E0DDD8;--sans:'DM Sans',system-ui,sans-serif}
@@ -410,6 +412,84 @@
 
 
 <script>
+
+  // ══ MAPOVÁNÍ NA EVIDENCI ══
+  const SB_URL = 'https://tgthwepwelukrdyjfwsd.supabase.co';
+  const SB_KEY = 'sb_publishable_gk7PtV1JC7GTf3TC2S4roQ_3ul03xHb';
+
+  const mapPohlavi = t => t.startsWith('Muž') ? 'M' : t.startsWith('Žena') ? 'F' : null;
+
+  const mapAktivita = t => {
+    if (t.includes('Sedavý'))       return 1.2;
+    if (t.includes('Lehká'))        return 1.375;
+    if (t.includes('Střední'))      return 1.55;
+    if (t.includes('Vysoká') && !t.includes('Velmi')) return 1.725;
+    if (t.includes('Velmi vysoká')) return 1.9;
+    return 1.55;
+  };
+
+  const mapCil = (t, pohlavi) => {
+    if (t.includes('Zhubnout'))        return 'loss';
+    if (t.includes('Nabrat'))          return 'gain';
+    if (t.includes('Udržet'))          return 'maintain';
+    if (t.includes('Zlepšit stravování')) return 'health';
+    if (t.includes('sportovní výkon')) return pohlavi === 'F' ? 'sport_female' : 'sport_male';
+    if (t.includes('zdravotní téma'))  return 'health';
+    return 'other';
+  };
+
+  const cislo = x => {
+    const n = parseFloat(String(x).replace(',', '.'));
+    return isNaN(n) ? null : n;
+  };
+
+  async function zapisDoEvidence(P) {
+    const sb = supabase.createClient(SB_URL, SB_KEY);
+    const pohlavi = mapPohlavi(P.pohlavi);
+    const casti = P.jmeno.trim().split(/\s+/);
+
+    const zaznam = {
+      name:      casti[0] || P.jmeno,
+      surname:   casti.slice(1).join(' '),
+      email:     P.email,
+      phone:     P.tel === '—' ? null : P.tel,
+      age:       cislo(P.vek),
+      height:    cislo(P.vyska),
+      weight:    cislo(P.hmotnost),
+      gender:    pohlavi,
+      activity:  mapAktivita(P.aktivita),
+      goal:      mapCil(P.cil, pohlavi),
+      allergies: [P.alergie, P.intolerance].filter(x => x && x !== '—').join(' · ') || null,
+      diseases:  P.nemoci === '—' ? null : P.nemoci,
+      dotaznik:  P,
+      status:    'active',
+    };
+
+    // Existuje už klient s tímto e-mailem?
+    const { data: stav } = await sb.from('clients').select('id').eq('email', P.email).limit(1);
+
+    if (stav && stav.length) {
+      await sb.from('clients').update(zaznam).eq('id', stav[0].id);
+    } else {
+      await sb.from('clients').insert([zaznam]);
+    }
+
+    // Vstupní měření do historie
+    if (zaznam.weight || cislo(P.tuk) || cislo(P.svaly)) {
+      const { data: k } = await sb.from('clients').select('id').eq('email', P.email).limit(1);
+      if (k && k.length) {
+        await sb.from('weight_history').insert([{
+          client_id:   k[0].id,
+          date:        new Date().toISOString().split('T')[0],
+          weight:      zaznam.weight,
+          body_fat:    cislo(P.tuk),
+          muscle_mass: cislo(P.svaly),
+          note:        'Vstupní hodnoty z dotazníku',
+        }]);
+      }
+    }
+  }
+
   // ══ EmailJS ══
   const EJ_PUBLIC   = 'LvWlTS14B_jyOxd0X';
   const EJ_SERVICE  = 'service_bzdflvc';
@@ -451,6 +531,127 @@
     hint.textContent = ok
       ? 'Vše je připraveno. Dotazník se odešle na vojtechvolejnik@gmail.com.'
       : 'Odeslání je možné až po zaškrtnutí tří povinných souhlasů výše.';
+  }
+
+
+  // ══ SUPABASE ══
+  const SB_URL = 'https://tgthwepwelukrdyjfwsd.supabase.co';
+  const SB_KEY = 'sb_publishable_gk7PtV1JC7GTf3TC2S4roQ_3ul03xHb';
+
+  const MAP_CIL = {
+    'Zhubnout / snížit tělesný tuk': 'loss',
+    'Nabrat svalovou hmotu': 'gain',
+    'Udržet hmotnost, zlepšit složení těla': 'maintain',
+    'Zlepšit stravování obecně, mít víc energie': 'health',
+    'Řešit konkrétní zdravotní téma': 'health',
+    'Jiné': 'other',
+  };
+  const MAP_AKT = {
+    'Sedavý režim, minimum pohybu': 1.2,
+    'Lehká aktivita — 1–3× týdně': 1.375,
+    'Střední aktivita — 3–5× týdně': 1.55,
+    'Vysoká aktivita — 6–7× týdně': 1.725,
+    'Velmi vysoká — trénink 2× denně nebo fyzická práce': 1.9,
+  };
+
+  function cislo(x) {
+    const n = parseFloat(String(x).replace(',', '.'));
+    return isNaN(n) ? null : n;
+  }
+  function textNeboNull(x) { return (!x || x === '—') ? null : x; }
+
+  async function zapisDoEvidence(P) {
+    const sb = supabase.createClient(SB_URL, SB_KEY);
+
+    const casti   = P.jmeno.trim().split(/\s+/);
+    const surname = casti.length > 1 ? casti.pop() : '';
+    const name    = casti.join(' ');
+
+    const gender = P.pohlavi === 'Muž' ? 'M' : P.pohlavi === 'Žena' ? 'F' : null;
+
+    let goal = MAP_CIL[P.cil] || null;
+    if (P.cil === 'Podpořit sportovní výkon') {
+      goal = gender === 'F' ? 'sport_female' : 'sport_male';
+    }
+
+    const alergie = [textNeboNull(P.alergie), textNeboNull(P.intolerance)]
+      .filter(Boolean).join(' · ') || null;
+
+    const poznamky = [
+      'CÍL: ' + P.cilslovy,
+      'UŽ ZKOUŠEL: ' + P.zkousel,
+      'CÍLOVÁ HMOTNOST: ' + P.cilhm + ' kg, horizont: ' + P.horizont,
+      '',
+      'ZAMĚSTNÁNÍ: ' + P.prace,
+      'SPORT: ' + P.sport + ' (' + P.kdytrenink + ')',
+      'SPÁNEK: ' + P.spanek + ' h, ' + P.kvalitaspanku + ' · STRES: ' + P.stres,
+      '',
+      'JÍDLA: ' + P.pocetjidel + ' denně, ' + P.casjidel,
+      'TEKUTINY: ' + P.tekutiny + ' · ' + P.copijete,
+      'KÁVA: ' + P.kava + ' · ALKOHOL: ' + P.alkohol,
+      'VAŘENÍ: ' + P.kdovari,
+      'MIMO DOMOV: ' + P.mimodomov,
+      'HLAVNÍ PROBLÉM: ' + P.problem,
+      '',
+      'SMĚR: ' + P.smer,
+      'NEJÍ: ' + P.nejite,
+      'OBLÍBENÁ: ' + P.oblibena,
+      'CHUTĚ: ' + P.chute,
+      '',
+      'LÉKY: ' + P.leky,
+      'DOPLŇKY: ' + P.doplnky,
+      'TRÁVENÍ: ' + P.traveni,
+      'TĚHOTENSTVÍ: ' + P.tehotenstvi,
+      'DALŠÍ: ' + P.dalsi,
+      '',
+      '── SOUHLASY (' + P.datum + ') ──',
+      'Obchodní podmínky: ' + P.s_podminky,
+      'Zdravotní údaje čl. 9: ' + P.s_zdravi,
+      'Pravdivost údajů: ' + P.s_pravdivost,
+      'Zahájení před 14 dny: ' + P.s_zahajeni,
+    ].join('\n');
+
+    const zaznam = {
+      name, surname,
+      email:     P.email,
+      phone:     textNeboNull(P.tel),
+      age:       cislo(P.vek),
+      height:    cislo(P.vyska),
+      weight:    cislo(P.hmotnost),
+      gender, goal,
+      activity:  MAP_AKT[P.aktivita] || 1.55,
+      allergies: alergie,
+      diseases:  textNeboNull(P.nemoci),
+      notes:     poznamky,
+      status:    'active',
+    };
+
+    // Existuje už klient s tímto e-mailem? → aktualizovat, jinak vložit
+    const { data: stav } = await sb.from('clients')
+      .select('id').eq('email', P.email).limit(1);
+
+    let clientId = null;
+    if (stav && stav.length) {
+      clientId = stav[0].id;
+      const { error } = await sb.from('clients').update(zaznam).eq('id', clientId);
+      if (error) throw error;
+    } else {
+      const { data, error } = await sb.from('clients').insert([zaznam]).select('id').single();
+      if (error) throw error;
+      clientId = data.id;
+    }
+
+    // Vstupní měření do historie
+    const w = cislo(P.hmotnost), tuk = cislo(P.tuk), svaly = cislo(P.svaly);
+    if (clientId && (w || tuk || svaly)) {
+      await sb.from('weight_history').insert([{
+        client_id: clientId,
+        date: new Date().toISOString().split('T')[0],
+        weight: w, body_fat: tuk, muscle_mass: svaly,
+        note: 'Vstupní dotazník',
+      }]);
+    }
+    return clientId;
   }
 
   // ── Sestavení a odeslání ──
@@ -514,8 +715,14 @@
     hint.textContent = 'Probíhá odeslání, chvilku strpení.';
 
     try {
-      if (EJ_TEMPLATE.startsWith('VAS_')) throw new Error('Šablona EmailJS není nastavena');
+      let dbOk = true;
+      try { await zapisDoEvidence(P); }
+      catch (dbErr) { dbOk = false; console.error('Supabase:', dbErr); }
+
       await emailjs.send(EJ_SERVICE, EJ_TEMPLATE, P);
+      if (!dbOk) console.warn('E-mail odešel, zápis do evidence selhal.');
+      try { await zapisDoEvidence(P); }
+      catch (dbErr) { console.error('Zápis do evidence selhal:', dbErr); }
       btn.textContent = '✓ Dotazník odeslán';
       btn.style.background = '#3A4D2C';
       hint.className = 'send-hint ok';
