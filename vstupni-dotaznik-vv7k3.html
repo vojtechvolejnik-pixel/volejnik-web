@@ -412,88 +412,10 @@
 
 
 <script>
-
-  // ══ MAPOVÁNÍ NA EVIDENCI ══
-  const SB_URL = 'https://tgthwepwelukrdyjfwsd.supabase.co';
-  const SB_KEY = 'sb_publishable_gk7PtV1JC7GTf3TC2S4roQ_3ul03xHb';
-
-  const mapPohlavi = t => t.startsWith('Muž') ? 'M' : t.startsWith('Žena') ? 'F' : null;
-
-  const mapAktivita = t => {
-    if (t.includes('Sedavý'))       return 1.2;
-    if (t.includes('Lehká'))        return 1.375;
-    if (t.includes('Střední'))      return 1.55;
-    if (t.includes('Vysoká') && !t.includes('Velmi')) return 1.725;
-    if (t.includes('Velmi vysoká')) return 1.9;
-    return 1.55;
-  };
-
-  const mapCil = (t, pohlavi) => {
-    if (t.includes('Zhubnout'))        return 'loss';
-    if (t.includes('Nabrat'))          return 'gain';
-    if (t.includes('Udržet'))          return 'maintain';
-    if (t.includes('Zlepšit stravování')) return 'health';
-    if (t.includes('sportovní výkon')) return pohlavi === 'F' ? 'sport_female' : 'sport_male';
-    if (t.includes('zdravotní téma'))  return 'health';
-    return 'other';
-  };
-
-  const cislo = x => {
-    const n = parseFloat(String(x).replace(',', '.'));
-    return isNaN(n) ? null : n;
-  };
-
-  async function zapisDoEvidence(P) {
-    const sb = supabase.createClient(SB_URL, SB_KEY);
-    const pohlavi = mapPohlavi(P.pohlavi);
-    const casti = P.jmeno.trim().split(/\s+/);
-
-    const zaznam = {
-      name:      casti[0] || P.jmeno,
-      surname:   casti.slice(1).join(' '),
-      email:     P.email,
-      phone:     P.tel === '—' ? null : P.tel,
-      age:       cislo(P.vek),
-      height:    cislo(P.vyska),
-      weight:    cislo(P.hmotnost),
-      gender:    pohlavi,
-      activity:  mapAktivita(P.aktivita),
-      goal:      mapCil(P.cil, pohlavi),
-      allergies: [P.alergie, P.intolerance].filter(x => x && x !== '—').join(' · ') || null,
-      diseases:  P.nemoci === '—' ? null : P.nemoci,
-      dotaznik:  P,
-      status:    'active',
-    };
-
-    // Existuje už klient s tímto e-mailem?
-    const { data: stav } = await sb.from('clients').select('id').eq('email', P.email).limit(1);
-
-    if (stav && stav.length) {
-      await sb.from('clients').update(zaznam).eq('id', stav[0].id);
-    } else {
-      await sb.from('clients').insert([zaznam]);
-    }
-
-    // Vstupní měření do historie
-    if (zaznam.weight || cislo(P.tuk) || cislo(P.svaly)) {
-      const { data: k } = await sb.from('clients').select('id').eq('email', P.email).limit(1);
-      if (k && k.length) {
-        await sb.from('weight_history').insert([{
-          client_id:   k[0].id,
-          date:        new Date().toISOString().split('T')[0],
-          weight:      zaznam.weight,
-          body_fat:    cislo(P.tuk),
-          muscle_mass: cislo(P.svaly),
-          note:        'Vstupní hodnoty z dotazníku',
-        }]);
-      }
-    }
-  }
-
   // ══ EmailJS ══
   const EJ_PUBLIC   = 'LvWlTS14B_jyOxd0X';
   const EJ_SERVICE  = 'service_bzdflvc';
-  const EJ_TEMPLATE = 'template_t7vqg2j';   // vyplněný dotazník → chodí vám
+  const EJ_TEMPLATE = 'template_t7vqg2j';
 
   window.addEventListener('load', () => {
     try { emailjs.init(EJ_PUBLIC); } catch(e) {}
@@ -507,10 +429,8 @@
     return a.length ? a.join(', ') : '—';
   };
 
-  // ── Blokace tlačítka dokud nejsou souhlasy ──
   function hlidejSouhlasy() {
-    const povinne = ['s1','s2','s3'];
-    povinne.forEach(id => {
+    ['s1','s2','s3'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('change', prekresli);
     });
@@ -529,10 +449,9 @@
     btn.disabled = !ok;
     hint.className = 'send-hint';
     hint.textContent = ok
-      ? 'Vše je připraveno. Dotazník se odešle na vojtechvolejnik@gmail.com.'
+      ? 'Vše je připraveno. Dotazník se odešle Vojtěchu Volejníkovi.'
       : 'Odeslání je možné až po zaškrtnutí tří povinných souhlasů výše.';
   }
-
 
   // ══ SUPABASE ══
   const SB_URL = 'https://tgthwepwelukrdyjfwsd.supabase.co';
