@@ -479,68 +479,34 @@
       return;
     }
 
-    const T = [
-      '═══ 01 · ZÁKLADNÍ ÚDAJE ═══',
-      'Jméno:            ' + v('q-jmeno'),
-      'E-mail:           ' + v('q-email'),
-      'Telefon:          ' + v('q-tel'),
-      'Věk:              ' + v('q-vek'),
-      'Pohlaví:          ' + v('q-pohlavi'),
-      'Výška:            ' + v('q-vyska') + ' cm',
-      'Hmotnost:         ' + v('q-hmotnost') + ' kg',
-      'Tělesný tuk:      ' + v('q-tuk') + ' %',
-      'Svalová hmota:    ' + v('q-svaly') + ' kg',
-      '',
-      '═══ 02 · CÍL ═══',
-      'Cíl:              ' + v('q-cil'),
-      'Cílová hmotnost:  ' + v('q-cilhm') + ' kg',
-      'Horizont:         ' + v('q-horizont'),
-      'Vlastními slovy:  ' + v('q-cilslovy'),
-      'Co už zkoušel:    ' + v('q-zkousel'),
-      '',
-      '═══ 03 · POHYB A REŽIM ═══',
-      'Zaměstnání:       ' + v('q-prace'),
-      'Aktivita:         ' + v('q-aktivita'),
-      'Sport/trénink:    ' + v('q-sport'),
-      'Kdy trénuje:      ' + v('q-kdytrenink'),
-      'Spánek:           ' + v('q-spanek') + ' h, kvalita: ' + v('q-kvalitaspanku'),
-      'Stres:            ' + rd('r-stres'),
-      '',
-      '═══ 04 · STRAVOVACÍ NÁVYKY ═══',
-      'Počet jídel:      ' + v('q-pocetjidel'),
-      'Časy jídel:       ' + v('q-casjidel'),
-      'Tekutiny:         ' + v('q-tekutiny'),
-      'Co pije:          ' + v('q-copijete'),
-      'Káva:             ' + v('q-kava'),
-      'Alkohol:          ' + v('q-alkohol'),
-      'Kdo vaří:         ' + v('q-kdovari'),
-      'Jí mimo domov:    ' + v('q-mimodomov'),
-      'Hlavní problém:   ' + v('q-problem'),
-      '',
-      '═══ 05 · PREFERENCE ═══',
-      'Stravovací směr:  ' + cb('c-smer'),
-      'Nejí:             ' + v('q-nejite'),
-      'Oblíbená jídla:   ' + v('q-oblibena'),
-      'Chutě:            ' + v('q-chute'),
-      '',
-      '═══ 06 · ZDRAVOTNÍ INFORMACE ═══',
-      'Alergie:          ' + v('q-alergie'),
-      'Intolerance:      ' + v('q-intolerance'),
-      'Onemocnění:       ' + v('q-nemoci'),
-      'Léky:             ' + v('q-leky'),
-      'Doplňky:          ' + v('q-doplnky'),
-      'Trávicí obtíže:   ' + v('q-traveni'),
-      'Těhotenství:      ' + rd('r-teh'),
-      'Další:            ' + v('q-dalsi'),
-      '',
-      '═══ 07 · SOUHLASY ═══',
-      'Obch. podmínky a zásady:   ANO',
-      'Zdravotní údaje (čl. 9):   ANO',
-      'Pravdivost údajů:          ANO',
-      'Zahájení před 14 dny:      ' + (document.getElementById('s4').checked ? 'ANO' : 'NE'),
-      '',
-      'Odesláno: ' + new Date().toLocaleString('cs-CZ'),
-    ].join('\n');
+    const P = {
+      jmeno: v('q-jmeno'), email: v('q-email'), tel: v('q-tel'), vek: v('q-vek'),
+      pohlavi: v('q-pohlavi'), vyska: v('q-vyska'), hmotnost: v('q-hmotnost'),
+      tuk: v('q-tuk'), svaly: v('q-svaly'),
+
+      cil: v('q-cil'), cilhm: v('q-cilhm'), horizont: v('q-horizont'),
+      cilslovy: v('q-cilslovy'), zkousel: v('q-zkousel'),
+
+      prace: v('q-prace'), aktivita: v('q-aktivita'), sport: v('q-sport'),
+      kdytrenink: v('q-kdytrenink'), spanek: v('q-spanek'),
+      kvalitaspanku: v('q-kvalitaspanku'), stres: rd('r-stres'),
+
+      pocetjidel: v('q-pocetjidel'), casjidel: v('q-casjidel'), tekutiny: v('q-tekutiny'),
+      copijete: v('q-copijete'), kava: v('q-kava'), alkohol: v('q-alkohol'),
+      kdovari: v('q-kdovari'), mimodomov: v('q-mimodomov'), problem: v('q-problem'),
+
+      smer: cb('c-smer'), nejite: v('q-nejite'), oblibena: v('q-oblibena'), chute: v('q-chute'),
+
+      alergie: v('q-alergie'), intolerance: v('q-intolerance'), nemoci: v('q-nemoci'),
+      leky: v('q-leky'), doplnky: v('q-doplnky'), traveni: v('q-traveni'),
+      tehotenstvi: rd('r-teh'), dalsi: v('q-dalsi'),
+
+      s_podminky: 'ANO', s_zdravi: 'ANO', s_pravdivost: 'ANO',
+      s_zahajeni: document.getElementById('s4').checked ? 'ANO' : 'NE',
+
+      datum: new Date().toLocaleString('cs-CZ'),
+      from_name: jmeno, from_email: mail, reply_to: mail,
+    };
 
     btn.disabled = true;
     btn.textContent = 'Odesílám…';
@@ -549,12 +515,7 @@
 
     try {
       if (EJ_TEMPLATE.startsWith('VAS_')) throw new Error('Šablona EmailJS není nastavena');
-      await emailjs.send(EJ_SERVICE, EJ_TEMPLATE, {
-        from_name:  jmeno,
-        from_email: mail,
-        reply_to:   mail,
-        dotaznik:   T,
-      });
+      await emailjs.send(EJ_SERVICE, EJ_TEMPLATE, P);
       btn.textContent = '✓ Dotazník odeslán';
       btn.style.background = '#3A4D2C';
       hint.className = 'send-hint ok';
