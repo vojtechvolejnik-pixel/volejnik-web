@@ -278,29 +278,7 @@
     font-size: 13px;
   }
 
-  .hero-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--peach);
-    border-radius: 50px;
-    padding: 6px 16px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--terra);
-    margin-bottom: 32px;
-    opacity: 0;
-    animation: fadeUp 0.6s ease forwards 0.1s;
-  }
 
-  .hero-tag::before {
-    content: '';
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--sage);
-  }
 
   .hero-title {
     font-family: var(--sans);
@@ -1053,7 +1031,6 @@
     .hero-title { font-size: clamp(28px, 9vw, 44px); line-height: 1.15; }
     .hero-sub { font-size: 15px; }
     .hero-status { font-size: 12px; flex-wrap: wrap; }
-    .hero-tag { font-size: 11px; }
 
     /* Nav */
     nav { padding: 0 16px; }
@@ -1186,7 +1163,6 @@
 <section class="hero">
   <div class="hero-inner">
     <div class="hero-left">
-      <div class="hero-tag">Poradenství pro výživu a suplementaci</div>
       <h1 class="hero-title">Cesta ke zdraví<br><em>bez extrémů</em></h1>
       <p class="hero-sub">
         Udržitelné změny, ne diety. Pomáhám lidem vybudovat zdravé návyky, které skutečně fungují — bez striktních pravidel a zbytečných doplňků.
@@ -1405,42 +1381,50 @@
     {
       icon: '🖥️',
       name: 'Online Start',
-      desc: 'Ideální pro efektivní začátek trvalé změny z pohodlí domova. Předem zaslaný dotazník, analýza stravování za 4 dny a 60minutová konzultace se srozumitelným vysvětlením největších chyb.',
-      price: '1 000 Kč',
+      desc: 'První krok bez závazku. Vyplníte vstupní dotazník a čtyřdenní stravovací arch, já z nich spočítám váš skutečný energetický výdej a na hodinové online konzultaci vám ukážu tři věci, které má smysl změnit hned. Písemné shrnutí dostanete e-mailem.',
+      price: '1 200 Kč',
       style: 'accent',
       span: 3,
     },
     {
       icon: '📝',
-      name: 'Detailní analýza + Vzorový plán',
-      desc: 'Rozbor 4denního stravovacího deníku, komplexní PDF s 5 klíčovými doporučeními a 7denní vzorový jídelníček sestavený přesně pro vaše cíle.',
-      price: '1 600 Kč',
+      name: 'Analýza + individuální jídelníček',
+      desc: 'Konkrétní plán místo obecných rad. Rozeberu váš čtyřdenní záznam stravy a sestavím sedmidenní jídelníček z běžně dostupných potravin — včetně nákupního seznamu, rozpisu makroživin a doporučení k suplementaci. Dodání do pěti pracovních dnů, jedna zpětná vazba zdarma.',
+      price: '1 800 Kč',
       style: '',
       span: 3,
     },
     {
       icon: '🚀',
       name: 'Měsíční balíček',
-      desc: 'Čtyřtýdenní intenzivní start — úvodní konzultace, kontrolní schůzka v půlce měsíce, jídelníček na míru a neomezená podpora na e-mailu či WhatsAppu.',
+      desc: 'Čtyři týdny systematické práce s průběžnou podporou. Úvodní hodinová konzultace, jídelníček na míru, kontrolní schůzka v polovině měsíce a neomezená komunikace přes WhatsApp nebo e-mail. Plán upravuju podle toho, jak se cítíte a co ukazují čísla.',
       price: '4 000 Kč',
       style: 'peach-tile',
-      span: 2,
+      span: 3,
     },
     {
-      icon: '📚',
-      name: 'E-booky',
-      desc: 'Rychlé a jednoduché recepty s přípravou do 30 minut, nákupní seznam a stručný teoretický úvod k danému cíli. Inspirace bez nutnosti osobního poradenství.',
-      price: '400 Kč',
+      icon: '🔥',
+      name: '3měsíční transformace',
+      desc: 'Pro ty, kdo chtějí trvalý výsledek. První měsíc odbouráme zlozvyky a nastavíme režim, druhý doladíme makra a suplementaci, třetí vás naučím fungovat samostatně. Šest konzultací, pravidelné měření tělesného složení a podpora po celou dobu.',
+      price: '10 000 Kč',
       style: '',
-      span: 2,
+      span: 3,
     },
     {
-      icon: '🎯',
-      name: 'Individuální plán / Volba',
-      desc: 'Nemůžete se rozhodnout, nebo hledáte něco na míru? Napište mi a společně sestavíme spolupráci přesně podle vašich potřeb a možností.',
-      price: 'Dle dohody',
+      icon: '💊',
+      name: 'Audit suplementace',
+      desc: 'Berete doplňky a nevíte, jestli správně? Pošlete mi jejich seznam nebo fotku a já posoudím formu, dávkování, načasování i vzájemné kombinace. V PDF reportu se dozvíte, co ponechat, co vysadit a co vám naopak chybí. Doplňky neprodávám a nemám z nich provize.',
+      price: '800 Kč',
       style: '',
-      span: 4,
+      span: 3,
+    },
+    {
+      icon: '🏃',
+      name: 'Sportovní výživa na míru',
+      desc: 'Jídelníček postavený kolem vašeho tréninkového plánu — jinak vypadá tréninkový den a jinak den volna. Řeším výživu před výkonem i po něm, hydrataci, elektrolyty a regeneraci. Patnáct let jsem hrál hokej, dnes dělám vytrvalost a silový trénink, takže vím, co tělo pod zátěží potřebuje.',
+      price: '2 000 Kč',
+      style: '',
+      span: 3,
     },
   ];
 

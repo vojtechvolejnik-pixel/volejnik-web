@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
 <title>Volejník — Evidence klientů</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
@@ -325,6 +326,23 @@
   .vit-tag-women { background: #FCE7F3; color: #9D174D; }
   .vit-tag-key { background: #D1FAE5; color: #065F46; }
 
+  /* ── DOTAZNÍK ── */
+  .dq-sec { margin-bottom: 20px; }
+  .dq-h { display:flex; align-items:baseline; gap:10px; margin-bottom:10px;
+          padding-bottom:8px; border-bottom:2px solid var(--sage); }
+  .dq-n { font-size:11px; font-weight:700; color:var(--sage); letter-spacing:.08em; }
+  .dq-t { font-size:13px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+  .dq-row { display:flex; gap:14px; padding:7px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .dq-row:last-child { border-bottom:none; }
+  .dq-l { width:165px; flex-shrink:0; color:rgba(28,28,30,.5); }
+  .dq-v { flex:1; color:var(--terra); font-weight:600; line-height:1.55; }
+  .dq-med { background:#FFF8F5; border-left:3px solid #C0392B; border-radius:0 8px 8px 0; padding:14px 18px; }
+  .dq-med .dq-h { border-bottom-color:#C0392B; }
+  .dq-med .dq-n, .dq-med .dq-t { color:#C0392B; }
+  .dq-ok { background:var(--peach); border-left:3px solid var(--sage); border-radius:0 8px 8px 0; padding:14px 18px; }
+  .dq-yes { color:var(--sage-d); font-weight:700; }
+  .dq-no { color:#C0392B; font-weight:700; }
+
   /* ── FOOD DIARY ── */
   .diary-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
   .diary-split { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -593,12 +611,12 @@
         <select class="filter-select" id="f-filter-service" onchange="renderTable()">
           <option value="">Všechny služby</option>
           <option>Online Start</option>
-          <option>Detailní analýza + Vzorový plán</option>
+          <option>Analýza + individuální jídelníček</option>
           <option>Měsíční balíček</option>
-          <option>E-booky</option>
-          <option>Individuální plán / Volba</option>
-          <option>Individuální plán / Volba</option>
-            <option>Jiné / vlastní</option>
+          <option>3měsíční transformace</option>
+          <option>Audit suplementace</option>
+          <option>Sportovní výživa na míru</option>
+          <option>Jiné / vlastní</option>
         </select>
       </div>
       <button class="add-btn" onclick="openAddModal()">＋ Přidat klienta</button>
@@ -732,11 +750,12 @@
           <select class="form-select" id="f-service">
             <option value="">— vyberte nebo napište —</option>
             <option>Online Start</option>
-            <option>Detailní analýza + Vzorový plán</option>
+            <option>Analýza + individuální jídelníček</option>
             <option>Měsíční balíček</option>
-            <option>E-booky</option>
-            <option>Individuální plán / Volba</option>
-          <option>Jiné / vlastní</option>
+            <option>3měsíční transformace</option>
+            <option>Audit suplementace</option>
+            <option>Sportovní výživa na míru</option>
+            <option>Jiné / vlastní</option>
           </select>
         </div>
         <div class="form-group">
@@ -797,6 +816,7 @@
       <button class="detail-tab" onclick="switchTab('progress',this)">📈 Vývoj</button>
       <button class="detail-tab" onclick="switchTab('macros',this)">🥗 Makra</button>
       <button class="detail-tab" onclick="switchTab('nutrition',this)">🎯 Příjem</button>
+      <button class="detail-tab" onclick="switchTab('dotaznik',this)">📋 Dotazník</button>
       <button class="detail-tab" onclick="switchTab('diary',this)">🍽 Deník</button>
       <button class="detail-tab" onclick="switchTab('ai',this)">🤖 AI Poradce</button>
       <button class="detail-tab" onclick="switchTab('docs',this)">📄 Dokumenty</button>
@@ -856,6 +876,11 @@
     <!-- PŘÍJEM TAB -->
     <div class="detail-panel" id="tab-nutrition">
       <div id="nutrition-content"></div>
+    </div>
+
+    <!-- DOTAZNÍK TAB -->
+    <div class="detail-panel" id="tab-dotaznik">
+      <div id="dotaznik-content"></div>
     </div>
 
     <!-- DENÍK STRAVY TAB -->
@@ -1637,6 +1662,7 @@ function switchTab(name, btn) {
   if (name === 'progress')  loadWeightHistory(detailId);
   if (name === 'macros')    renderMacros(detailId);
   if (name === 'diary')     loadDiary(detailId);
+  if (name === 'dotaznik')  renderDotaznik(detailId);
   if (name === 'nutrition') renderNutritionPlan(detailId);
   if (name === 'ai')        initAiAdvisor(detailId);
 }
